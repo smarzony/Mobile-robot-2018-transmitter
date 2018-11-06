@@ -7,7 +7,7 @@
 RF24 radio(8, 7);
 
 const byte rxAddr[6] = { '1','N','o','d','e','0' };
-byte outcoming_message[10];
+byte outcoming_message[6];
 byte message_counter = 0;
 
 unsigned long long now, last_message_send;
