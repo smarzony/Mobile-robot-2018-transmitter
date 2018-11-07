@@ -1,0 +1,11 @@
+Changelog:
+
+18.11.06
+	Radio module is powered directly from 10 V power rail.
+	Message length is shortened to 6 bytes
+	Receiver skips about 20% of data, but communication is quite stable
+	
+18.11.07
+	Radio module worked like shit before changing channel - need auto channel change: check data loss rate and if its over 20% send message to pilot about changing channel.
+	Analog calibration still in progress
+	Pretty good data loss rate - almost 0 %

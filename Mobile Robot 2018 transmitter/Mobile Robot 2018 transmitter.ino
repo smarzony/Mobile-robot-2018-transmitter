@@ -17,8 +17,8 @@ void setup()
 	Serial.begin(9600);
 
 	radio.begin();
-	radio.setRetries(15, 15);
-	radio.setChannel(110);
+	//radio.setRetries(15, 15);
+	radio.setChannel(2);
 	radio.openWritingPipe(rxAddr);
 
 	//radio.stopListening();
