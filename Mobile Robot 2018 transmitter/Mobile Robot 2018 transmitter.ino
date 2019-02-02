@@ -4,6 +4,23 @@
 
 #define MESSAGE_SEND_PERIOD 200
 
+struct radioData {
+	byte analog_left_X;
+	byte analog_left_Y;
+	byte analog_right_X;
+	byte analog_right_Y;
+	byte led_r;
+	byte led_g;
+	byte led_b;
+	byte reserved0;
+	byte reserved1;
+	byte reserved2;
+	byte reserved3;
+	byte message_no;
+};
+
+radioData message;
+
 RF24 radio(8, 7);
 
 const byte rxAddr[6] = { '1','N','o','d','e','0' };
@@ -15,13 +32,14 @@ unsigned long long now, last_message_send;
 void setup()
 {
 	Serial.begin(9600);
-
+	Serial.println("Starting...");
 	radio.begin();
-	//radio.setRetries(15, 15);
-	radio.setChannel(2);
+	radio.setRetries(2, 5);
+	radio.setChannel(75);
+	// ----------------------------   JAK SIÊ ROZJEBIE TO ZMIEN KANA£ -----------------------------------
 	radio.openWritingPipe(rxAddr);
 
-	//radio.stopListening();
+	radio.stopListening();
 }
 
 void loop()
@@ -35,11 +53,17 @@ void prepareOutMessage(int period)
 {
 	if (now - last_message_send >= period)
 	{
+		message.analog_left_Y =		analogRead(0)/4;
+		message.analog_left_X =		analogRead(1)/4;
+		message.analog_right_Y =	analogRead(2)/4;
+		message.analog_right_X =	analogRead(3)/4;
+		/*
 		for (int i = 0; i <= 3; i++)
 		{
 			outcoming_message[i] = analogRead(i) / 4;
-		}
+		}*/
 		outcoming_message[sizeof(outcoming_message) - 1] = message_counter;
+		message.message_no = message_counter;
 		message_counter++;
 	}
 }
@@ -50,7 +74,8 @@ void sendRadio(int period)
 	{
 		last_message_send = now;
 		radio.stopListening();
-		radio.write(&outcoming_message, sizeof(outcoming_message));
+		//radio.write(&outcoming_message, sizeof(outcoming_message));
+		radio.write(&message, sizeof(message));
 		radio.startListening();
 		printMessage();
 	}
@@ -58,10 +83,22 @@ void sendRadio(int period)
 
 void printMessage()
 {
+	/*
 	for (int i = 0; i < sizeof(outcoming_message); i++)
 	{
 		Serial.print(outcoming_message[i]);
 		Serial.print(' ');
-	}
+	}*/
+	
+	Serial.print(message.analog_left_X);
+	Serial.print(' ');
+	Serial.print(message.analog_left_Y);
+	Serial.print(' ');
+	Serial.print(message.analog_right_X);
+	Serial.print(' ');
+	Serial.print(message.analog_right_Y);
+	Serial.print(' ');
+	Serial.print(message.message_no);
+
 	Serial.println();
 }
