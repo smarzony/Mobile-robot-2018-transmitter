@@ -19,27 +19,29 @@ struct radioData {
 	byte message_no;
 };
 
+//radio variables
 radioData message;
+RF24 radio(7,8);
+const byte rxAddr[6] = { '1','N','o','d','e','1' };
 
-RF24 radio(8, 7);
-
-const byte rxAddr[6] = { '1','N','o','d','e','0' };
 byte outcoming_message[6];
 byte message_counter = 0;
-
-unsigned long long now, last_message_send;
+unsigned long now, last_message_send;
 
 void setup()
 {
 	Serial.begin(9600);
 	Serial.println("Starting...");
+	//---------------------- Radio config BEGIN -----------------
 	radio.begin();
+	radio.setDataRate(RF24_1MBPS);
 	radio.setRetries(2, 5);
-	radio.setChannel(75);
-	// ----------------------------   JAK SIÊ ROZJEBIE TO ZMIEN KANA£ -----------------------------------
+	radio.setChannel(0);// 100
+	// -----------   JAK SIÊ ROZJEBIE TO ZMIEN KANA£ ---------
 	radio.openWritingPipe(rxAddr);
-
 	radio.stopListening();
+
+	//---------------------- Radio config END -----------------
 }
 
 void loop()
@@ -47,6 +49,7 @@ void loop()
 	now = millis();
 	prepareOutMessage(MESSAGE_SEND_PERIOD);
 	sendRadio(MESSAGE_SEND_PERIOD);
+	
 }
 
 void prepareOutMessage(int period)
@@ -89,6 +92,13 @@ void printMessage()
 		Serial.print(outcoming_message[i]);
 		Serial.print(' ');
 	}*/
+
+	int ms, seconds, minutes, hours;
+
+	ms = millis() % 1000;
+	seconds = ( millis() / 1000 ) % 60;
+	minutes = ( millis() / (1000*60) ) % 60;
+	//hours = (millis() / (1000 * 60 * 60)) % 24;
 	
 	Serial.print(message.analog_left_X);
 	Serial.print(' ');
@@ -99,6 +109,23 @@ void printMessage()
 	Serial.print(message.analog_right_Y);
 	Serial.print(' ');
 	Serial.print(message.message_no);
+	Serial.print(" \tt: ");
+	//Serial.print(hours);
+	//Serial.print(':');
+	Serial.print(minutes);
+	Serial.print(':');
+	Serial.print(seconds);
+	Serial.print('.');
 
-	Serial.println();
+
+	if (ms < 10)
+		Serial.print("00");
+	if (ms > 10 && ms < 100)
+		Serial.print('0');
+
+	Serial.print(ms);
+
+	Serial.print(" Conn: ");
+	Serial.println(radio.isChipConnected());
+	
 }
