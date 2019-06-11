@@ -16,6 +16,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Mobile Robot 2018 transmitter.ino" />
+    <None Include="SerialOutput.ino" />
+    <None Include="Buttons.ino" />
+    <None Include="RadioHandle.ino" />
+    <None Include="RotoryEncoder.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.Mobile Robot 2018 transmitter.vsarduino.h">

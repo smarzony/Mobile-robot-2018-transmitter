@@ -9,3 +9,8 @@ Changelog:
 	Radio module worked like shit before changing channel - need auto channel change: check data loss rate and if its over 20% send message to pilot about changing channel.
 	Analog calibration still in progress
 	Pretty good data loss rate - almost 0 %
+	
+19.06.11
+	I probably wrote this log as it is a receiver.
+	Radio communication works well, but not flawless. Remote controller got new functions, buttons and wider communication gate. In future I plan to add two more potentiometers and I2C screen for 
+	receiving data back from robot.
