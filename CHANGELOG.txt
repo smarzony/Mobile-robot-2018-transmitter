@@ -3,5 +3,7 @@ Mobile Robot Remote Controller
 Changelog:
 	
 19.06.11
-	Radio communication works well, but not flawless. Remote controller got new functions, buttons and wider communication gate. In future I plan to add two more potentiometers and I2C screen for 
-	receiving data back from robot.
+	Radio communication works well, but not flawless. Remote controller got new functions, buttons and wider communication gate. In 	future I plan to add two more potentiometers and I2C screen for	receiving data back from robot.
+	
+19.06.13
+	Tasks were separated with timers, but buttons and encoder got its own handlers, because it works better that way.
