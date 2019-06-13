@@ -33,7 +33,6 @@ void sendRadio()
 
 	last_message_send = now;
 	radio.stopListening();
-	//radio.write(&outcoming_message, sizeof(outcoming_message));
 	radio.write(&message, sizeof(message));
 	radio.startListening();
 
