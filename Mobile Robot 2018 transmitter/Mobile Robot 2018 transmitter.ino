@@ -6,9 +6,9 @@
 #define CE 7
 #define CSN 8
 
-#define MESSAGE_SEND_PERIOD 200
+#define MESSAGE_SEND_PERIOD 250
 #define BUTTON_DELAY 400
-#define ROTORY_ENCODER_CHANGE_MIN_TIME 250
+#define ROTORY_ENCODER_CHANGE_MIN_TIME 150
 
 #define SIDE_SWITCH 4
 #define ANALOG_LEFT_PUSHBUTTON 2
@@ -45,7 +45,7 @@ struct rotoryEncoder {
 	byte value;
 };
 
-SimpleTimer SerialRawTimer, SerialSwitchesTimer;
+SimpleTimer SerialRawTimer, SerialSwitchesTimer, PrepareMessageTimer, SendRadioTimer, RotoryEncoderTimer;
 
 //radio variables
 radioData message;
@@ -82,25 +82,21 @@ void setup()
 	radio.stopListening();
 
 	//---------------------- Radio config END -----------------
-	SerialRawTimer.setInterval(500, serialPrintRaw);
-	SerialSwitchesTimer.setInterval(500, serialPrintSwitches);
-
+	SerialRawTimer.setInterval(500, serialPrintRaw);	
+	PrepareMessageTimer.setInterval(200, prepareOutMessage);
+	SendRadioTimer.setInterval(250, sendRadio);
 }
 
 void loop()
 {
 	now = millis();
-
-	if ( true || digitalRead(SIDE_SWITCH) == 0)
-		SerialRawTimer.run();
-	else
-		SerialSwitchesTimer.run();
-
-	rotoryEncoderHandler();
+	PrepareMessageTimer.run();
+	SendRadioTimer.run();
+	SerialRawTimer.run();
+	
+	//Rotory encoder and tactile switches works better this way
 	tactileSwitchesHandler();
-
-	prepareOutMessage(MESSAGE_SEND_PERIOD);
-	sendRadio(MESSAGE_SEND_PERIOD);
+	rotoryEncoderHandler();
 }
 
 
