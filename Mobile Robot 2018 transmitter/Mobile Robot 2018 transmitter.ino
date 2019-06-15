@@ -21,7 +21,7 @@
 //SERIAL OUTPUT
 
 
-struct radioData {
+struct radioDataTrasnsmit {
 	byte analog_left_X;
 	byte analog_left_Y;
 	byte analog_right_X;
@@ -36,6 +36,19 @@ struct radioData {
 	byte message_no;
 };
 
+struct radioDataReceive {
+	byte reserved0,
+		reserved1,
+		reserved2,
+		reserved3,
+		reserved4,
+		reserved5,
+		reserved6,
+		reserved7,
+		reserved8,
+		message_no;
+};
+
 struct rotoryEncoder {
 	bool clk_actual;
 	bool clk_prev;
@@ -48,9 +61,11 @@ struct rotoryEncoder {
 SimpleTimer SerialRawTimer, SerialSwitchesTimer, PrepareMessageTimer, SendRadioTimer, RotoryEncoderTimer;
 
 //radio variables
-radioData message;
+radioDataTrasnsmit message_transmit;
+radioDataReceive message_receive;
 RF24 radio(CE, CSN);
-const byte rxAddr[6] = { '1','N','o','d','e','1' };
+const byte txAddr[6] = { '1','N','o','d','e','1' };
+const byte rxAddr[6] = { '1','N','o','d','e','2' };
 
 byte outcoming_message[6];
 byte message_counter = 0;
@@ -78,7 +93,8 @@ void setup()
 	radio.setRetries(2, 5);
 	radio.setChannel(0);// 100
 	// -----------   JAK SIÊ ROZJEBIE TO ZMIEN KANA£ ---------
-	radio.openWritingPipe(rxAddr);
+	radio.openWritingPipe(txAddr);
+	radio.openReadingPipe(0, rxAddr);
 	radio.stopListening();
 
 	//---------------------- Radio config END -----------------
