@@ -37,9 +37,9 @@ struct radioDataTrasnsmit {
 };
 
 struct radioDataReceive {
-	byte reserved0,
-		reserved1,
-		reserved2,
+	byte velocity_measured_left,
+		velocity_measured_right,
+		distance,
 		reserved3,
 		reserved4,
 		reserved5,
@@ -50,28 +50,48 @@ struct radioDataReceive {
 };
 
 struct rotoryEncoder {
-	bool clk_actual;
-	bool clk_prev;
-	bool dt_actual;
-	bool dt_prev;
-	bool switch_state;
+	bool clk_actual,
+		 clk_prev,
+		 dt_actual,
+		 dt_prev,
+		 switch_state;
 	byte value;
 };
 
-SimpleTimer SerialRawTimer, SerialSwitchesTimer, PrepareMessageTimer, SendRadioTimer, RotoryEncoderTimer;
+struct radioStruct {
+	byte last_message_no, 
+		current_message_no, 
+		messages_lost, 
+		radio_not_availalble_counter;
+
+	bool radio_not_availalble, empty_receive_data;
+};
+
+SimpleTimer SerialRawTimer, 
+	SerialSwitchesTimer, 
+	SerialIncomingRadioTimer, 
+	PrepareMessageTimer, 
+	SendRadioTimer, 
+	RotoryEncoderTimer;
 
 //radio variables
 radioDataTrasnsmit message_transmit;
 radioDataReceive message_receive;
+radioStruct radioData;
+
 RF24 radio(CE, CSN);
 const byte txAddr[6] = { '1','N','o','d','e','1' };
 const byte rxAddr[6] = { '1','N','o','d','e','2' };
 
 byte outcoming_message[6];
 byte message_counter = 0;
-unsigned long now, last_message_send, last_encloder_change;
 
-bool analog_left_switch_state, analog_right_switch_state;
+unsigned long now,
+	last_message_send,
+	last_encloder_change;
+
+bool analog_left_switch_state, 
+	analog_right_switch_state;
 
 rotoryEncoder rotory_encoder;
 
@@ -101,6 +121,7 @@ void setup()
 	SerialRawTimer.setInterval(500, serialPrintRaw);	
 	PrepareMessageTimer.setInterval(200, prepareOutMessage);
 	SendRadioTimer.setInterval(250, sendRadio);
+	SerialIncomingRadioTimer.setInterval(1000, serialPrintIncomingMessage);
 }
 
 void loop()
@@ -108,8 +129,10 @@ void loop()
 	now = millis();
 	PrepareMessageTimer.run();
 	SendRadioTimer.run();
-	SerialRawTimer.run();
+	//SerialRawTimer.run();
+	SerialIncomingRadioTimer.run();
 	
+	readRadio(0);
 	//Rotory encoder and tactile switches works better this way
 	tactileSwitchesHandler();
 	rotoryEncoderHandler();

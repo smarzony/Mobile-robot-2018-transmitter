@@ -36,41 +36,27 @@ void sendRadio()
 	radio.startListening();
 }
 
-/*
-void readRadio(int period, bool printing)
-{
 
-	if ((now - last_message_read >= period))
-	{
+void readRadio(bool printing)
+{
 		if (radio.available())
 		{
-			last_message_no = current_message_no;
-
+			radioData.last_message_no = radioData.current_message_no;
 			radio.read(&message_receive, sizeof(message_receive));
-			current_message_no = message_receive.message_no;
-			messages_lost = current_message_no - last_message_no - 1;
-			if (printing)
-				printMessage(RADIO_PRINT_INCOMING_MESSAGE);
-			radio_not_availalble = 0;
-			radio_not_availalble_counter = 0;
-
-			side_switch = bitRead(message_receive.bit_array, 0);
-			analog_left_switch = bitRead(message_receive.bit_array, 1);
-			analog_right_switch = bitRead(message_receive.bit_array, 2);
-			rotory_encoder_switch = bitRead(message_receive.bit_array, 3);
+			radioData.current_message_no = message_receive.message_no;
+			radioData.messages_lost = radioData.current_message_no - radioData.last_message_no - 1;
+			radioData.radio_not_availalble = 0;
+			radioData.radio_not_availalble_counter = 0;
 		}
 		else
 		{
-			radio_not_availalble = 1;
-			radio_not_availalble_counter++;
+			radioData.radio_not_availalble = 1;
+			radioData.radio_not_availalble_counter++;
 		}
 
-		if (message_receive.analog_left_Y == 0 && message_receive.analog_left_X &&
-			message_receive.analog_right_X == 0 & message_receive.analog_right_Y == 0)
-			empty_receive_data = 1;
+		if (message_receive.velocity_measured_left == 0 && message_receive.velocity_measured_right &&
+			message_receive.message_no == 0)
+			radioData.empty_receive_data = 1;
 		else
-			empty_receive_data = 0;
-
-	}
+			radioData.empty_receive_data = 0;
 }
-*/

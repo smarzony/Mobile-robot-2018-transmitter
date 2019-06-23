@@ -27,6 +27,20 @@ void serialPrintRaw()
 void serialPrintSwitches()
 {
 	String output;
+	Serial.println(output);
+}
+
+void serialPrintIncomingMessage()
+{
+	String output;
+	output += message_receive.velocity_measured_left;
+	output += ' ';
+	output += message_receive.velocity_measured_right;
+	output += ' ';
+	output += message_receive.distance;
+	output += ' ';
+	output += message_receive.message_no;
+
 
 	Serial.println(output);
 }
