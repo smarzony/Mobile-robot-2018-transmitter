@@ -20,6 +20,7 @@
     <None Include="Buttons.ino" />
     <None Include="RadioHandle.ino" />
     <None Include="RotoryEncoder.ino" />
+    <None Include="OLED_Display.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.Mobile Robot 2018 transmitter.vsarduino.h">

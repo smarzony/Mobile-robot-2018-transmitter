@@ -1,26 +1,4 @@
 
-/*void rotoryEncoderHandler()
-{
-	rotory_encoder.clk_actual = digitalRead(ROTORY_ENCODER_CLK);
-	rotory_encoder.dt_actual = digitalRead(ROTORY_ENCODER_DT);
-
-	if ((rotory_encoder.clk_prev == 0 && rotory_encoder.clk_actual == 1 && rotory_encoder.dt_actual == 1) ||
-		(rotory_encoder.clk_prev == 1 && rotory_encoder.clk_actual == 0 && rotory_encoder.dt_actual == 0))
-	{
-		
-		rotory_encoder.value--;
-	}
-	if ((rotory_encoder.clk_prev == 1 && rotory_encoder.clk_actual == 0 && rotory_encoder.dt_actual == 1) ||
-		(rotory_encoder.clk_prev == 0 && rotory_encoder.clk_actual == 1 && rotory_encoder.dt_actual == 0))
-	{		
-		rotory_encoder.value++;
-	}
-
-	rotory_encoder.clk_prev = digitalRead(ROTORY_ENCODER_CLK);
-	rotory_encoder.dt_prev = digitalRead(ROTORY_ENCODER_DT);
-}
-*/
-//OLD VERSION
 void rotoryEncoderHandler()
 {
 	rotory_encoder.clk_actual = digitalRead(ROTORY_ENCODER_CLK);

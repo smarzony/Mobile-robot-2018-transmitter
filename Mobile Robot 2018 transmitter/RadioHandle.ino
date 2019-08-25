@@ -34,6 +34,7 @@ void sendRadio()
 	radio.stopListening();
 	radio.write(&message_transmit, sizeof(message_transmit));
 	radio.startListening();
+	
 }
 
 
@@ -59,4 +60,5 @@ void readRadio(bool printing)
 			radioData.empty_receive_data = 1;
 		else
 			radioData.empty_receive_data = 0;
+			
 }

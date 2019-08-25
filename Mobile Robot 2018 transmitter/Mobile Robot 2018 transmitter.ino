@@ -1,7 +1,10 @@
-#include <SimpleTimer.h>
+//#include <SimpleTimer.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 #define CE 7
 #define CSN 8
@@ -17,6 +20,10 @@
 
 #define ROTORY_ENCODER_CLK 6
 #define ROTORY_ENCODER_DT 5
+
+#define OLED_RESET 4
+
+
 
 //SERIAL OUTPUT
 
@@ -67,13 +74,11 @@ struct radioStruct {
 	bool radio_not_availalble, empty_receive_data;
 };
 
-SimpleTimer SerialRawTimer, 
-	SerialSwitchesTimer, 
-	SerialIncomingRadioTimer, 
-	PrepareMessageTimer, 
-	SendRadioTimer, 
-	RotoryEncoderTimer;
+Adafruit_SSD1306 display(OLED_RESET);
 
+/*
+SimpleTimer 
+*/
 //radio variables
 radioDataTrasnsmit message_transmit;
 radioDataReceive message_receive;
@@ -88,7 +93,14 @@ byte message_counter = 0;
 
 unsigned long now,
 	last_message_send,
-	last_encloder_change;
+	last_encloder_change,
+	SerialRawTimer,
+	SerialSwitchesTimer,
+	SerialIncomingRadioTimer,
+	PrepareMessageTimer,
+	SendRadioTimer,
+	RotoryEncoderTimer,
+	DisplayUpdateTimer;
 
 bool analog_left_switch_state, 
 	analog_right_switch_state;
@@ -107,7 +119,11 @@ void setup()
 	pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
 	pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
 	pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
+
+	//pinMode(A4, INPUT_PULLUP);
+	//pinMode(A5, INPUT_PULLUP);
 	//---------------------- Radio config BEGIN -----------------
+	
 	radio.begin();
 	radio.setDataRate(RF24_1MBPS);
 	radio.setRetries(2, 5);
@@ -116,26 +132,71 @@ void setup()
 	radio.openWritingPipe(txAddr);
 	radio.openReadingPipe(0, rxAddr);
 	radio.stopListening();
-
+	
 	//---------------------- Radio config END -----------------
+
+	//---------------------- OLED Display -----------------
+	display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+	display.clearDisplay();
+
+
+	//---------------------- OLED Display END -----------------
+	/*
 	SerialRawTimer.setInterval(500, serialPrintRaw);	
 	PrepareMessageTimer.setInterval(200, prepareOutMessage);
 	SendRadioTimer.setInterval(250, sendRadio);
 	SerialIncomingRadioTimer.setInterval(1000, serialPrintIncomingMessage);
+	DisplayUpdateTimer.setInterval(500, display_handle);
+	*/
 }
 
 void loop()
 {
 	now = millis();
+	
+	if (now - SerialRawTimer > 500)
+	{
+		serialPrintRaw();
+		SerialRawTimer = now;
+	}
+
+	if (now - PrepareMessageTimer > 200)
+	{
+		prepareOutMessage();
+		PrepareMessageTimer = now;
+	}
+
+	if (now - SendRadioTimer > 250)
+	{
+		sendRadio();
+		SendRadioTimer = now;
+	}
+
+	if (now - SerialIncomingRadioTimer > 1000)
+	{
+		serialPrintIncomingMessage();
+		SerialIncomingRadioTimer = now;
+	}
+
+	if (now - DisplayUpdateTimer > 750)
+	{
+		display_refresh();
+		DisplayUpdateTimer = now;
+	}
+
+	/*	
 	PrepareMessageTimer.run();
 	SendRadioTimer.run();
 	//SerialRawTimer.run();
 	SerialIncomingRadioTimer.run();
-	
+	*/
+
 	readRadio(0);
+	display_draw();
 	//Rotory encoder and tactile switches works better this way
 	tactileSwitchesHandler();
 	rotoryEncoderHandler();
+	
 }
 
 

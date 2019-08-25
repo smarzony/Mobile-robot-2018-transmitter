@@ -77,6 +77,7 @@ typedef void *__builtin_va_list;
 
 #include "Mobile Robot 2018 transmitter.ino"
 #include "Buttons.ino"
+#include "OLED_Display.ino"
 #include "RadioHandle.ino"
 #include "RotoryEncoder.ino"
 #include "SerialOutput.ino"
