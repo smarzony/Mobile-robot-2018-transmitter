@@ -39,6 +39,8 @@ void serialPrintIncomingMessage()
 	output += ' ';
 	output += message_receive.distance;
 	output += ' ';
+	output += message_receive.control_mode;
+	output += ' ';
 	output += message_receive.message_no;
 
 

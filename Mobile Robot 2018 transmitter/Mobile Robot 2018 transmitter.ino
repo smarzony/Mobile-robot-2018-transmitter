@@ -11,7 +11,7 @@
 
 #define MESSAGE_SEND_PERIOD 250
 #define BUTTON_DELAY 400
-#define ROTORY_ENCODER_CHANGE_MIN_TIME 150
+#define ROTORY_ENCODER_CHANGE_MIN_TIME 200
 
 #define SIDE_SWITCH 4
 #define ANALOG_LEFT_PUSHBUTTON 2
@@ -22,6 +22,10 @@
 #define ROTORY_ENCODER_DT 5
 
 #define OLED_RESET 4
+
+#define CONTROLS_STANDARD 0
+#define CONTROLS_ENCHANCED 1
+#define CONTROLS_MEASURED 2
 
 
 
@@ -47,7 +51,7 @@ struct radioDataReceive {
 	byte velocity_measured_left,
 		velocity_measured_right,
 		distance,
-		reserved3,
+		control_mode,
 		reserved4,
 		reserved5,
 		reserved6,
@@ -156,7 +160,7 @@ void loop()
 	
 	if (now - SerialRawTimer > 500)
 	{
-		serialPrintRaw();
+		serialPrintIncomingMessage();
 		SerialRawTimer = now;
 	}
 
