@@ -11,7 +11,7 @@
 
 #define MESSAGE_SEND_PERIOD 250
 #define BUTTON_DELAY 400
-#define ROTORY_ENCODER_CHANGE_MIN_TIME 200
+#define ROTORY_ENCODER_CHANGE_MIN_TIME 50
 
 #define SIDE_SWITCH 4
 #define ANALOG_LEFT_PUSHBUTTON 2
@@ -27,7 +27,7 @@
 #define CONTROLS_ENCHANCED 1
 #define CONTROLS_MEASURED 2
 
-
+#define MENU_SIZE 5
 
 //SERIAL OUTPUT
 
@@ -110,6 +110,16 @@ bool analog_left_switch_state,
 	analog_right_switch_state;
 
 rotoryEncoder rotory_encoder;
+
+String menu_item_list[MENU_SIZE][MENU_SIZE] = {
+	{"MENU1","MENU2","MENU3","MENU4","SPARE"},
+	{"SUB11","SUB12","SUB13","SUB14","BACK"},
+	{"SUB21","SUB22","SUB23","SUB24","BACK"},
+	{"SUB31","SUB32","SUB33","SUB34","BACK"},
+	{"SUB41","SUB42","SUB43","SUB44","BACK"},
+};
+byte menu_no = 0;
+
 
 void setup()
 {
