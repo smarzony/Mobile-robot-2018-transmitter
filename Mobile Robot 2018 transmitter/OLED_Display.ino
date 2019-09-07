@@ -3,8 +3,8 @@ void display_draw()
 
 
 }
-
-void display_refresh()
+/*
+void display_refresh_old()
 {	
 
 	int menuItem = (rotory_encoder.value % MENU_SIZE);
@@ -50,36 +50,26 @@ void display_refresh()
 	display.display();
 	display.clearDisplay();
 } 
+*/
 
-/*
-void display_refresh_old()
-{
+void display_refresh()
+{/*
 	const int menu_size = 5;
-	int menu_level[menu_size][menu_size] = { 0, 0 };
+	//int menu_level[menu_size][menu_size] = { 0, 0 };
 	int menuItem = (rotory_encoder.value % menu_size) + 1;
-	/*if (rotory_encoder.value > menuSize)
+	if (rotory_encoder.value > menu_size)
 		rotory_encoder.value = 1;
 
 	if (rotory_encoder.value < 1)
-		rotory_encoder.value = menuSize;
-
-
-
-	String menu_item_list[menu_size][menu_size] = {
-		{"MENU1","MENU2","MENU3","MENU4","MENU5"},
-		{"SUB11","SUB12","SUB13","SUB14","BACK"},
-		{"SUB21","SUB22","SUB23","SUB24","BACK"},
-		{"SUB31","SUB32","SUB33","SUB34","BACK"},
-		{"SUB41","SUB42","SUB43","SUB44","BACK"},
-	};
-
+		rotory_encoder.value = menu_size;
+*/
 	// constant place elements
 	display.setTextSize(1);
 	display.setTextColor(WHITE);
 
 	display.setCursor(0, 55);
 	display.print(message_counter / 4);
-
+/*
 	display.setCursor(115, 55);
 	display.print(menuItem);
 
@@ -124,9 +114,8 @@ void display_refresh_old()
 		break;
 	}
 	display.println(output);
-
+*/
 
 	display.display();
 	display.clearDisplay();
 }
-*/

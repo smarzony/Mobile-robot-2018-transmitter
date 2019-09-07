@@ -1,22 +1,21 @@
-C:\Users\piotr.smarzynski\AppData\Local\Temp\VMBuilds\Mobile\ Robot\ 2018\ transmitter\pro_16MHzatmega328\Debug\Adafruit_SSD1306\Adafruit_SSD1306.cpp.o: \
- C:\Users\piotr.smarzynski\Documents\Arduino\libraries\Adafruit_SSD1306\Adafruit_SSD1306.cpp \
- C:\Users\piotr.smarzynski\Documents\Arduino\libraries\Adafruit_GFX_Library/Adafruit_GFX.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/binary.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/WCharacter.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/WString.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/HardwareSerial.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Stream.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Print.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Printable.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/USBAPI.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\variants\eightanaloginputs/pins_arduino.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\variants\eightanaloginputs/../standard/pins_arduino.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Print.h \
- C:\Users\piotr.smarzynski\Documents\Arduino\libraries\Adafruit_GFX_Library/gfxfont.h \
- C:\Users\piotr.smarzynski\Documents\Arduino\libraries\Adafruit_SSD1306\Adafruit_SSD1306.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\Wire\src/Wire.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Stream.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\SPI\src/SPI.h \
- C:\Users\piotr.smarzynski\Documents\Arduino\libraries\Adafruit_SSD1306\splash.h
+C:\Users\Piotr\AppData\Local\Temp\VMBuilds\Mobile\ Robot\ 2018\ transmitter\pro_16MHzatmega328\Debug\Adafruit_SSD1306\Adafruit_SSD1306.cpp.o: \
+ C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_SSD1306\Adafruit_SSD1306.cpp \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\libraries\Wire\src/Wire.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Stream.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Print.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/WString.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Printable.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\libraries\SPI\src/SPI.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Arduino.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/binary.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/WCharacter.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/HardwareSerial.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Stream.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/USBAPI.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Arduino.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\variants\eightanaloginputs/pins_arduino.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\variants\eightanaloginputs/../standard/pins_arduino.h \
+ C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_GFX_Library/Adafruit_GFX.h \
+ C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Print.h \
+ C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_GFX_Library/gfxfont.h \
+ C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_SSD1306\Adafruit_SSD1306.h

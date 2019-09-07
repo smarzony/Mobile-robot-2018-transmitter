@@ -162,39 +162,40 @@ void setup()
 	SerialIncomingRadioTimer.setInterval(1000, serialPrintIncomingMessage);
 	DisplayUpdateTimer.setInterval(500, display_handle);
 	*/
+	Serial.println("P01");
 }
 
 void loop()
 {
 	now = millis();
-	
+	Serial.println("P02");
 	if (now - SerialRawTimer > 500)
 	{
-		serialPrintIncomingMessage();
+		//serialPrintIncomingMessage();
 		SerialRawTimer = now;
 	}
-
+	Serial.println("P03");
 	if (now - PrepareMessageTimer > 200)
 	{
-		prepareOutMessage();
+		//prepareOutMessage();
 		PrepareMessageTimer = now;
 	}
-
+	Serial.println("P04");
 	if (now - SendRadioTimer > 250)
 	{
-		sendRadio();
+		//sendRadio();
 		SendRadioTimer = now;
 	}
-
+	Serial.println("P05");
 	if (now - SerialIncomingRadioTimer > 1000)
 	{
 		serialPrintIncomingMessage();
 		SerialIncomingRadioTimer = now;
 	}
-
+	Serial.println("P06");
 	if (now - DisplayUpdateTimer > 750)
 	{
-		display_refresh();
+		//display_refresh();
 		DisplayUpdateTimer = now;
 	}
 
@@ -204,11 +205,14 @@ void loop()
 	//SerialRawTimer.run();
 	SerialIncomingRadioTimer.run();
 	*/
-
+	Serial.println("P07");
 	readRadio(0);
+	Serial.println("P08");
 	display_draw();
+	Serial.println("P09");
 	//Rotory encoder and tactile switches works better this way
 	tactileSwitchesHandler();
+	Serial.println("P10");
 	rotoryEncoderHandler();
 	
 }
