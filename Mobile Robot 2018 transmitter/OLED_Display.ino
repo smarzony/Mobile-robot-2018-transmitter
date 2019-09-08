@@ -53,29 +53,18 @@ void display_refresh_old()
 */
 
 void display_refresh()
-{/*
-	const int menu_size = 5;
-	//int menu_level[menu_size][menu_size] = { 0, 0 };
-	int menuItem = (rotory_encoder.value % menu_size) + 1;
-	if (rotory_encoder.value > menu_size)
-		rotory_encoder.value = 1;
+{
 
-	if (rotory_encoder.value < 1)
-		rotory_encoder.value = menu_size;
-*/
 	// constant place elements
 	display.setTextSize(1);
 	display.setTextColor(WHITE);
 
-	display.setCursor(0, 55);
+	display.setCursor(0, 56);
 	display.print(message_counter / 4);
-/*
-	display.setCursor(115, 55);
-	display.print(menuItem);
 
-	display.setCursor(1, ((menuItem - 1) * 10));
-	display.print('>');
-
+	
+	display.setCursor(100, 56);
+	display.print(message_receive.message_no/4);
 
 
 	// variable elements
@@ -87,15 +76,13 @@ void display_refresh()
 	display.print("VR : ");
 	display.println(message_receive.velocity_measured_left);
 
-	display.setCursor(10, 20);
-	display.print("MSG: ");
-	display.println(message_receive.message_no);
 
-	display.setCursor(10, 30);
+
+	display.setCursor(10, 20);
 	display.print("DIS: ");
 	display.println(message_receive.distance);
 
-	display.setCursor(10, 40);
+	display.setCursor(10, 30);
 	display.print("MOD: ");
 
 	String output;
@@ -114,7 +101,7 @@ void display_refresh()
 		break;
 	}
 	display.println(output);
-*/
+
 
 	display.display();
 	display.clearDisplay();

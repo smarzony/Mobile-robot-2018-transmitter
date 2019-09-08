@@ -1,9 +1,8 @@
-//#include <SimpleTimer.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
+//#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
 #define CE 7
@@ -111,13 +110,13 @@ bool analog_left_switch_state,
 
 rotoryEncoder rotory_encoder;
 
-String menu_item_list[MENU_SIZE][MENU_SIZE] = {
+/*String menu_item_list[MENU_SIZE][MENU_SIZE] = {
 	{"MENU1","MENU2","MENU3","MENU4","SPARE"},
 	{"SUB11","SUB12","SUB13","SUB14","BACK"},
 	{"SUB21","SUB22","SUB23","SUB24","BACK"},
 	{"SUB31","SUB32","SUB33","SUB34","BACK"},
 	{"SUB41","SUB42","SUB43","SUB44","BACK"},
-};
+};*/
 byte menu_no = 0;
 
 
@@ -162,59 +161,58 @@ void setup()
 	SerialIncomingRadioTimer.setInterval(1000, serialPrintIncomingMessage);
 	DisplayUpdateTimer.setInterval(500, display_handle);
 	*/
-	Serial.println("P01");
+	
 }
 
 void loop()
 {
 	now = millis();
-	Serial.println("P02");
+	
 	if (now - SerialRawTimer > 500)
 	{
 		//serialPrintIncomingMessage();
 		SerialRawTimer = now;
 	}
-	Serial.println("P03");
-	if (now - PrepareMessageTimer > 200)
-	{
-		//prepareOutMessage();
-		PrepareMessageTimer = now;
-	}
-	Serial.println("P04");
-	if (now - SendRadioTimer > 250)
-	{
-		//sendRadio();
-		SendRadioTimer = now;
-	}
-	Serial.println("P05");
+
 	if (now - SerialIncomingRadioTimer > 1000)
 	{
 		serialPrintIncomingMessage();
 		SerialIncomingRadioTimer = now;
 	}
-	Serial.println("P06");
+	
+	if (now - PrepareMessageTimer > 200)
+	{
+		prepareOutMessage();
+		PrepareMessageTimer = now;
+	}
+	
+	if (now - SendRadioTimer > 250)
+	{
+		sendRadio();
+		SendRadioTimer = now;
+	}
+	
 	if (now - DisplayUpdateTimer > 750)
 	{
-		//display_refresh();
+		display_refresh();
 		DisplayUpdateTimer = now;
 	}
 
-	/*	
-	PrepareMessageTimer.run();
-	SendRadioTimer.run();
-	//SerialRawTimer.run();
-	SerialIncomingRadioTimer.run();
-	*/
-	Serial.println("P07");
 	readRadio(0);
-	Serial.println("P08");
+	
 	display_draw();
-	Serial.println("P09");
+	
 	//Rotory encoder and tactile switches works better this way
-	tactileSwitchesHandler();
-	Serial.println("P10");
+	tactileSwitchesHandler();	
 	rotoryEncoderHandler();
 	
 }
 
+/*
+int freeRam() {
+	extern int __heap_start, *__brkval;
+	int v;
+	return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
+}
+*/
 

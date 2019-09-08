@@ -19,7 +19,7 @@ C:\Users\Piotr\AppData\Local\Temp\VMBuilds\Mobile\ Robot\ 2018\ transmitter\pro_
  C:\Users\Piotr\Documents\Arduino\libraries\RF24/RF24_config.h \
  C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\libraries\Wire\src/Wire.h \
  C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Stream.h \
+ C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_SSD1306/Adafruit_SSD1306.h \
  C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_GFX_Library/Adafruit_GFX.h \
  C:\Users\Piotr\AppData\Local\arduino15\packages\arduino\hardware\avr\1.6.21\cores\arduino/Print.h \
- C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_GFX_Library/gfxfont.h \
- C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_SSD1306/Adafruit_SSD1306.h
+ C:\Users\Piotr\Documents\Arduino\libraries\Adafruit_GFX_Library/gfxfont.h
