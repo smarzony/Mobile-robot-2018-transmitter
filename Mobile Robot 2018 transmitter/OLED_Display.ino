@@ -160,6 +160,11 @@ void display_refresh()
 	display.print("POT: ");
 	display.println(message_transmit.potentiometer);
 
+	line = line + 10;
+	display.setCursor(column, line);
+	display.print("DIS: ");
+	display.println(message_receive.distance);
+
 
 	// UPPER BOTTOM BAR
 	/*
