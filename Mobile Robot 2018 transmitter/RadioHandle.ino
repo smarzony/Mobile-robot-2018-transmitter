@@ -1,18 +1,31 @@
+byte byte_limit(int value)
+{
+	if (value > 255)
+		value = 255;
+	if (value < 0)
+		value = 0;
+	return byte(value);
+}
+
 void prepareOutMessage()
 {
+	int value_send;
 
+	value_send = analogRead(0) / 4 + analog_correction.analog_left_X_correct;
+	message_transmit.analog_left_X = byte_limit(value_send);
 
-	int wait = 0;
-	message_transmit.analog_left_Y = analogRead(1) / 4;
-	//delay(wait);
-	message_transmit.analog_left_X = analogRead(0) / 4;
-	//delay(wait);
-	message_transmit.analog_right_Y = analogRead(3) / 4;
-	//delay(wait);
-	message_transmit.analog_right_X = analogRead(2) / 4;
-	//delay(wait);
-	message_transmit.steering_wheel = analogRead(6) / 4;
+	value_send = analogRead(1) / 4 + analog_correction.analog_left_Y_correct;
+	message_transmit.analog_left_Y = byte_limit(value_send);
 
+	value_send = analogRead(2) / 4 + analog_correction.analog_right_X_correct;
+	message_transmit.analog_right_X = byte_limit(value_send);
+		
+	value_send = analogRead(3) / 4 + analog_correction.analog_right_Y_correct;
+	message_transmit.analog_right_Y = byte_limit(value_send);
+
+	message_transmit.control_mode = control_mode;
+
+	message_transmit.potentiometer = analogRead(6) / 4;
 	message_transmit.rotory_encoder = rotory_encoder.value;
 
 	// Some magic to set bits in byte
@@ -26,6 +39,7 @@ void prepareOutMessage()
 	message_transmit.message_no = message_counter;
 	message_counter++;
 
+	sendRadio();
 }
 
 void sendRadio()

@@ -9,7 +9,7 @@ void serialPrintRaw()
 	output += ' ';
 	output += message_transmit.analog_right_Y;
 	output += ' ';
-	output += message_transmit.steering_wheel;
+	output += message_transmit.potentiometer;
 	output += ' ';
 	output += message_transmit.rotory_encoder;
 	output += ' ';

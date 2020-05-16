@@ -1,7 +1,8 @@
 #include <SPI.h>
-#include <nRF24L01.h>
+//#include <nRF24L01.h>
 #include <RF24.h>
 #include <Wire.h>
+#include <EEPROM.h>
 //#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -11,6 +12,7 @@
 #define MESSAGE_SEND_PERIOD 250
 #define BUTTON_DELAY 400
 #define ROTORY_ENCODER_CHANGE_MIN_TIME 50
+
 
 #define SIDE_SWITCH 4
 #define ANALOG_LEFT_PUSHBUTTON 2
@@ -22,28 +24,46 @@
 
 #define OLED_RESET 4
 
-#define CONTROLS_STANDARD 0
-#define CONTROLS_ENCHANCED 1
-#define CONTROLS_MEASURED 2
+#define CONTROLS_NONE 0
+#define CONTROLS_STANDARD 1
+#define CONTROLS_ENCHANCED 2
+#define CONTROLS_MEASURED 3
+#define CONTROLS_AUTONOMUS 4
+
+#define ROT_PB_EDIT_NONE 0
+#define ROT_PB_EDIT_LX 1
+#define ROT_PB_EDIT_LY 2
+#define ROT_PB_EDIT_RX 3
+#define ROT_PB_EDIT_RY 4
+#define ROT_PB_EDIT_CTRL 5
+#define ROT_PB_EDIT_CH 6
+#define ROTORY_ENCODER_SWITCH_MAX 6
 
 #define MENU_SIZE 5
 
+
 //SERIAL OUTPUT
 
+struct analogCorrection {
+	int analog_left_X_correct = 0;
+	int analog_left_Y_correct = 0;
+	int analog_right_X_correct = 0;
+	int analog_right_Y_correct = 0;
+};
 
 struct radioDataTrasnsmit {
-	byte analog_left_X;
-	byte analog_left_Y;
-	byte analog_right_X;
-	byte analog_right_Y;
-	byte led_r;
-	byte led_g;
-	byte led_b;
-	byte steering_wheel;
-	byte reserved1;
-	byte rotory_encoder;
-	byte bit_array;
-	byte message_no;
+	byte analog_left_X,
+		analog_left_Y,
+		analog_right_X,
+		analog_right_Y,
+		servo_0,
+		led_g,
+		led_b,
+		potentiometer,
+		control_mode,
+		rotory_encoder,
+		bit_array,
+		message_no;
 };
 
 struct radioDataReceive {
@@ -51,7 +71,7 @@ struct radioDataReceive {
 		velocity_measured_right,
 		distance,
 		control_mode,
-		reserved4,
+		time_delay,
 		reserved5,
 		reserved6,
 		reserved7,
@@ -65,7 +85,10 @@ struct rotoryEncoder {
 		 dt_actual,
 		 dt_prev,
 		 switch_state;
-	byte value;
+	byte value,
+		switch_value = 0,
+		switch_value_old;
+	int value_int;
 };
 
 struct radioStruct {
@@ -86,6 +109,8 @@ SimpleTimer
 radioDataTrasnsmit message_transmit;
 radioDataReceive message_receive;
 radioStruct radioData;
+uint8_t radio_channel = 0;
+uint8_t control_mode = 0;
 
 RF24 radio(CE, CSN);
 const byte txAddr[6] = { '1','N','o','d','e','1' };
@@ -109,6 +134,7 @@ bool analog_left_switch_state,
 	analog_right_switch_state;
 
 rotoryEncoder rotory_encoder;
+analogCorrection analog_correction;
 
 /*String menu_item_list[MENU_SIZE][MENU_SIZE] = {
 	{"MENU1","MENU2","MENU3","MENU4","SPARE"},
@@ -135,12 +161,21 @@ void setup()
 
 	//pinMode(A4, INPUT_PULLUP);
 	//pinMode(A5, INPUT_PULLUP);
+
+	analog_correction.analog_left_X_correct = int(get_memory(0, 1)) - 128;
+	analog_correction.analog_left_Y_correct = int(get_memory(1, 1)) - 128;
+	analog_correction.analog_right_X_correct = int(get_memory(2, 1)) - 128;
+	analog_correction.analog_right_Y_correct = int(get_memory(3, 1)) - 128;
+	radio_channel = get_memory(4, 1);
+	control_mode = get_memory(5, 1);
+
+	
 	//---------------------- Radio config BEGIN -----------------
 	
 	radio.begin();
 	radio.setDataRate(RF24_1MBPS);
 	radio.setRetries(2, 5);
-	radio.setChannel(0);// 100
+	radio.setChannel(radio_channel);// 100
 	// -----------   JAK SIÊ ROZJEBIE TO ZMIEN KANA£ ---------
 	radio.openWritingPipe(txAddr);
 	radio.openReadingPipe(0, rxAddr);
@@ -154,65 +189,109 @@ void setup()
 
 
 	//---------------------- OLED Display END -----------------
-	/*
-	SerialRawTimer.setInterval(500, serialPrintRaw);	
-	PrepareMessageTimer.setInterval(200, prepareOutMessage);
-	SendRadioTimer.setInterval(250, sendRadio);
-	SerialIncomingRadioTimer.setInterval(1000, serialPrintIncomingMessage);
-	DisplayUpdateTimer.setInterval(500, display_handle);
-	*/
-	
+	calibration();
 }
 
 void loop()
 {
 	now = millis();
 	
-	if (now - SerialRawTimer > 500)
+	if (rotory_encoder.switch_value != rotory_encoder.switch_value_old && rotory_encoder.switch_value != 0)
 	{
-		//serialPrintIncomingMessage();
-		SerialRawTimer = now;
+		switch (rotory_encoder.switch_value)
+		{
+		case ROT_PB_EDIT_LX:
+			rotory_encoder.value_int = analog_correction.analog_left_X_correct;
+			break;
+
+		case ROT_PB_EDIT_LY:
+			rotory_encoder.value_int = analog_correction.analog_left_Y_correct;
+			break;
+
+		case ROT_PB_EDIT_RX:
+			rotory_encoder.value_int = analog_correction.analog_right_X_correct;
+			break;
+
+		case ROT_PB_EDIT_RY:
+			rotory_encoder.value_int = analog_correction.analog_right_Y_correct;
+			break;
+
+		case ROT_PB_EDIT_CTRL:
+			rotory_encoder.value_int = control_mode;
+			break;			
+
+		case ROT_PB_EDIT_CH:
+			rotory_encoder.value_int = radio_channel;
+			break;
+		}
 	}
 
+	switch (rotory_encoder.switch_value)
+	{
+	case ROT_PB_EDIT_LX:
+		analog_correction.analog_left_X_correct = rotory_encoder.value_int;
+		save_memory(0, 1, analog_correction.analog_left_X_correct + 128);
+		break;
+
+	case ROT_PB_EDIT_LY:
+		analog_correction.analog_left_Y_correct = rotory_encoder.value_int;
+		save_memory(1, 1, analog_correction.analog_left_Y_correct + 128);
+		break;
+
+	case ROT_PB_EDIT_RX:
+		analog_correction.analog_right_X_correct = rotory_encoder.value_int;
+		save_memory(2, 1, analog_correction.analog_right_X_correct + 128);
+		break;
+
+	case ROT_PB_EDIT_RY:
+		analog_correction.analog_right_Y_correct = rotory_encoder.value_int;
+		save_memory(3, 1, analog_correction.analog_right_Y_correct + 128);
+		break;
+
+	case ROT_PB_EDIT_CTRL:
+		if (rotory_encoder.value_int > 4)
+			rotory_encoder.value_int = 0;
+		if (rotory_encoder.value_int < 0)
+			rotory_encoder.value_int = 4;
+		control_mode = rotory_encoder.value_int;
+		save_memory(5, 1, control_mode);
+		break;
+
+	case ROT_PB_EDIT_CH:
+		if (rotory_encoder.value_int > 120)
+			rotory_encoder.value_int = 0;
+		if (rotory_encoder.value_int < 0)
+			rotory_encoder.value_int = 120;
+		radio_channel = rotory_encoder.value_int;
+		save_memory(4, 1, radio_channel);
+		break;
+
+	}
+	rotory_encoder.switch_value_old = rotory_encoder.switch_value;
+
+	
 	if (now - SerialIncomingRadioTimer > 1000)
 	{
-		serialPrintIncomingMessage();
 		SerialIncomingRadioTimer = now;
 	}
 	
-	if (now - PrepareMessageTimer > 200)
+	if (now - PrepareMessageTimer > 20)
 	{
 		prepareOutMessage();
 		PrepareMessageTimer = now;
 	}
 	
-	if (now - SendRadioTimer > 250)
-	{
-		sendRadio();
-		SendRadioTimer = now;
-	}
-	
-	if (now - DisplayUpdateTimer > 750)
+	if (now - DisplayUpdateTimer > 700)
 	{
 		display_refresh();
 		DisplayUpdateTimer = now;
 	}
 
-	readRadio(0);
-	
-	display_draw();
-	
-	//Rotory encoder and tactile switches works better this way
+	readRadio(0);	
 	tactileSwitchesHandler();	
 	rotoryEncoderHandler();
+
+	if (rotory_encoder.switch_value == ROTORY_ENCODER_SWITCH_MAX + 1)
+		calibration();
 	
 }
-
-/*
-int freeRam() {
-	extern int __heap_start, *__brkval;
-	int v;
-	return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
-}
-*/
-
