@@ -1,53 +1,3 @@
-
-/*
-void display_refresh_old()
-{
-
-	int menuItem = (rotory_encoder.value % MENU_SIZE);
-
-	// constant position elements
-	display.setTextSize(1);
-	display.setTextColor(WHITE);
-
-	// display message counter to check if cpu isn't hanged
-	display.setCursor(0, 55);
-	display.print(message_counter/4);
-
-	// display actual cursor position
-	display.setCursor(115, 55);
-	display.print(menuItem);
-
-	// menu cursor - to be changed to inverse display
-	display.setCursor(1, (menuItem * 10) );
-	display.print('>');
-
-	// moving around and changing menus
-	if (digitalRead(ROTORY_ENCODER_PUSHBUTTON) == 0)
-	{
-		if (menu_no == 0)
-		{
-			menu_no = menuItem + 1;
-		}
-		else if (menu_no != 0)
-		{
-			if (menuItem == 4)
-				menuItem = 1;
-		}
-	}
-
-
-	// display menu from list
-	for (int i = 0; i <= MENU_SIZE; i++)
-	{
-		display.setCursor(10, (i * 10));
-		display.print(menu_item_list[menu_no][i]);
-	}
-
-	display.display();
-	display.clearDisplay();
-}
-*/
-
 void display_refresh()
 {
 	display.setTextSize(1);
@@ -57,16 +7,7 @@ void display_refresh()
 	byte column = 0;
 	byte line = 0;
 	byte space = 0;
-/*
-	display.setCursor(column, line);
-	display.print("VL : ");
-	display.println(message_receive.velocity_measured_left);
 
-	line = line + 10;
-	display.setCursor(column, line);
-	display.print("VR : ");
-	display.println(message_receive.velocity_measured_left);
-	*/
 	display.setCursor(column, line);
 	if (rotory_encoder.switch_value == ROT_PB_EDIT_LX)
 		display.setTextColor(BLACK, WHITE);
@@ -162,52 +103,55 @@ void display_refresh()
 
 	line = line + 10;
 	display.setCursor(column, line);
-	display.print("DIS: ");
-	display.println(message_receive.distance);
+//	display.print("DIS: ");
+//	display.println(message_receive.distance);
+  display.print("RSV: ");
+  display.println(rotory_encoder.switch_value);
+  
 
 
 	// UPPER BOTTOM BAR
-	/*
-	if (rotory_encoder.switch_value > 0 && rotory_encoder.switch_value <= ROTORY_ENCODER_SWITCH_MAX)
-	{
-		line = 48;
-		column = 0;
-		space = 20;
-
-		display.setCursor(column, line);
-		display.print("MEM: ");
-
-		column = column + 24;
-		display.setCursor(column, line);
-		display.setTextColor(BLACK, WHITE);
-		display.print(get_memory(0, 1));
-		display.setTextColor(WHITE);
-
-		column = column + space;
-		display.setCursor(column, line);
-		display.setTextColor(BLACK, WHITE);
-		display.print(get_memory(1, 1));
-		display.setTextColor(WHITE);
-
-		column = column + space;
-		display.setCursor(column, line);
-		display.setTextColor(BLACK, WHITE);
-		display.print(get_memory(2, 1));
-		display.setTextColor(WHITE);
-
-		column = column + space;
-		display.setCursor(column, line);
-		display.setTextColor(BLACK, WHITE);
-		display.print(get_memory(3, 1));
-		display.setTextColor(WHITE);
-
-		column = column + space;
-		display.setCursor(column, line);
-		display.setTextColor(BLACK, WHITE);
-		display.print(get_memory(4, 1));
-		display.setTextColor(WHITE);
-	}
-	*/
+//	
+//	if (rotory_encoder.switch_value > 0 && rotory_encoder.switch_value <= ROTORY_ENCODER_SWITCH_MAX)
+//	{
+//		line = 48;
+//		column = 0;
+//		space = 20;
+//
+//		display.setCursor(column, line);
+//		display.print("MEM: ");
+//
+//		column = column + 24;
+//		display.setCursor(column, line);
+//		display.setTextColor(BLACK, WHITE);
+//		display.print(get_memory(0, 1));
+//		display.setTextColor(WHITE);
+//
+//		column = column + space;
+//		display.setCursor(column, line);
+//		display.setTextColor(BLACK, WHITE);
+//		display.print(get_memory(1, 1));
+//		display.setTextColor(WHITE);
+//
+//		column = column + space;
+//		display.setCursor(column, line);
+//		display.setTextColor(BLACK, WHITE);
+//		display.print(get_memory(2, 1));
+//		display.setTextColor(WHITE);
+//
+//		column = column + space;
+//		display.setCursor(column, line);
+//		display.setTextColor(BLACK, WHITE);
+//		display.print(get_memory(3, 1));
+//		display.setTextColor(WHITE);
+//
+//		column = column + space;
+//		display.setCursor(column, line);
+//		display.setTextColor(BLACK, WHITE);
+//		display.print(get_memory(4, 1));
+//		display.setTextColor(WHITE);
+//	}
+	
 	if (rotory_encoder.switch_value == ROTORY_ENCODER_SWITCH_MAX + 1)
 	{
 		line = 47;

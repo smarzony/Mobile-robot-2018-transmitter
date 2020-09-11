@@ -1,0 +1,7 @@
+{
+    "programmer": "AVRISP mkII",
+    "board": "arduino:avr:pro",
+    "configuration": "cpu=16MHzatmega168",
+    "port": "COM4",
+    "sketch": "Mobile_Robot_2018_transmitter.ino"
+}

@@ -11,21 +11,21 @@ void prepareOutMessage()
 {
 	int value_send;
 
-	value_send = analogRead(0) / 4 + analog_correction.analog_left_X_correct;
+	value_send = analogRead(ANALOG_LEFT_X) / 4 + analog_correction.analog_left_X_correct;
 	message_transmit.analog_left_X = byte_limit(value_send);
 
-	value_send = analogRead(1) / 4 + analog_correction.analog_left_Y_correct;
+	value_send = analogRead(ANALOG_LEFT_Y) / 4 + analog_correction.analog_left_Y_correct;
 	message_transmit.analog_left_Y = byte_limit(value_send);
 
-	value_send = analogRead(2) / 4 + analog_correction.analog_right_X_correct;
+	value_send = analogRead(ANALOG_RIGHT_X) / 4 + analog_correction.analog_right_X_correct;
 	message_transmit.analog_right_X = byte_limit(value_send);
 		
-	value_send = analogRead(3) / 4 + analog_correction.analog_right_Y_correct;
+	value_send = analogRead(ANALOG_RIGHT_Y) / 4 + analog_correction.analog_right_Y_correct;
 	message_transmit.analog_right_Y = byte_limit(value_send);
 
 	message_transmit.control_mode = control_mode;
 
-	message_transmit.potentiometer = analogRead(6) / 4;
+	message_transmit.potentiometer = analogRead(POTENTIOMETER) / 4;
 	message_transmit.rotory_encoder = rotory_encoder.value;
 
 	// Some magic to set bits in byte
@@ -47,10 +47,8 @@ void sendRadio()
 	last_message_send = now;
 	radio.stopListening();
 	radio.write(&message_transmit, sizeof(message_transmit));
-	radio.startListening();
-	
+	radio.startListening();	
 }
-
 
 void readRadio(bool printing)
 {

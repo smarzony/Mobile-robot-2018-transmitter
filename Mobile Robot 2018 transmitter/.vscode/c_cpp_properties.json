@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "D:\\Programy\\Arduino_SSD\\tools\\**",
+                "D:\\Programy\\Arduino_SSD\\hardware\\arduino\\avr\\**"
+            ],
+            "forcedInclude": [
+                "D:\\Programy\\Arduino_SSD\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "compilerPath": "C:\\Program Files\\mingw-w64\\x86_64-7.1.0-win32-seh-rt_v5-rev2\\mingw64\\bin\\gcc.exe",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++14"
+        }
+    ],
+    "version": 4
+}
