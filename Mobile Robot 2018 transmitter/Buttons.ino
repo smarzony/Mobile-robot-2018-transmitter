@@ -16,7 +16,7 @@ void read_button_neg_switch(byte button, bool &state)
 {
   static unsigned long lastTime;
   unsigned long timeNow = millis();
-
+  #ifdef PROMINI
   if (digitalRead(button) == 0) {
     if (timeNow - lastTime < BUTTON_DELAY)
       return;
@@ -26,13 +26,26 @@ void read_button_neg_switch(byte button, bool &state)
     }
     lastTime = timeNow;
   }
+  #endif
+
+  #ifdef NODEMCU
+  if (remoteIO.digitalRead(button) == 0) {
+    if (timeNow - lastTime < BUTTON_DELAY)
+      return;
+    if (remoteIO.digitalRead(button) == 0)
+    {
+      state = !state;
+    }
+    lastTime = timeNow;
+  }
+  #endif
 }
 
 void read_button_inc_switch(byte button, int limit_min, int limit_max, uint8_t& state)
 {
   static unsigned long lastTime;
   unsigned long timeNow = millis();
-
+  #ifdef PROMINI
   if (digitalRead(button) == 0) {
     if (timeNow - lastTime < BUTTON_DELAY)
       return;
@@ -47,26 +60,52 @@ void read_button_inc_switch(byte button, int limit_min, int limit_max, uint8_t& 
     }
     lastTime = timeNow;
   }
+  #endif
+
+  #ifdef NODEMCU
+  if (remoteIO.digitalRead(button) == 0) {
+    if (timeNow - lastTime < BUTTON_DELAY)
+      return;
+    if (remoteIO.digitalRead(button) == 0)
+    {
+      state += 1;
+      if (state <= limit_max)
+      {
+        //        Serial.print("Inc switch: ");
+        //        Serial.println(state);
+      }
+    }
+    lastTime = timeNow;
+  }
+  #endif
+ 
   if (state > limit_max)
   {
     state = limit_min;
-    //    Serial.print("Inc switch: ");
-    //    Serial.println(state);
   }
   if (state < limit_min)
   {
     state = limit_max;
-    //    Serial.print("Inc switch: ");
-    //    Serial.println(state);
   }
+
 }
 
 void calibration()
 {
-  analog_correction.analog_left_X_correct = 128 - (analogRead(0) / 4);
-  analog_correction.analog_left_Y_correct = 128 - (analogRead(1) / 4);
-  analog_correction.analog_right_X_correct = 128 - (analogRead(2) / 4);
-  analog_correction.analog_right_Y_correct = 128 - (analogRead(3) / 4);
+  #ifdef PROMINI
+    analog_correction.analog_left_X_correct = 128 - (analogRead(ANALOG_LEFT_X) / 4);
+    analog_correction.analog_left_Y_correct = 128 - (analogRead(ANALOG_LEFT_Y) / 4);
+    analog_correction.analog_right_X_correct = 128 - (analogRead(ANALOG_RIGHT_X) / 4);
+    analog_correction.analog_right_Y_correct = 128 - (analogRead(ANALOG_RIGHT_Y) / 4);
+  #endif
+
+  #ifdef NODEMCU
+    analog_correction.analog_left_X_correct = 128 - (remoteAI.readADC_SingleEnded(ANALOG_LEFT_X ) / 4);
+    analog_correction.analog_left_Y_correct = 128 - (remoteAI.readADC_SingleEnded(ANALOG_LEFT_Y )/ 4);
+    analog_correction.analog_right_X_correct = 128 - (remoteAI.readADC_SingleEnded(ANALOG_RIGHT_X ) / 4);
+    analog_correction.analog_right_Y_correct = 128 - (remoteAI.readADC_SingleEnded(ANALOG_RIGHT_Y ) / 4);
+  #endif
+
 
 	save_memory(0, 1, analog_correction.analog_left_X_correct + 128);
 	save_memory(1, 1, analog_correction.analog_left_Y_correct + 128);

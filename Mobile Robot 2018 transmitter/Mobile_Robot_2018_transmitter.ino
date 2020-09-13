@@ -1,6 +1,7 @@
 
 #define NODEMCU
 #define WIFI_STATION
+#define CALIBRATE
 // #define WIFI_ACCESS_POINT
 // #define PROMINI
 
@@ -10,55 +11,55 @@
 #include <EEPROM.h>
 #include <Adafruit_SSD1306.h>
 #ifdef NODEMCU
-#include <jm_PCF8574.h>
-#include <Adafruit_ADS1015.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>
+  #include <jm_PCF8574.h>
+  #include <Adafruit_ADS1015.h>
+  #include <ESP8266WiFi.h>
+  #include <ESP8266mDNS.h>
+  #include <WiFiUdp.h>
+  #include <ArduinoOTA.h>
 #endif
 
 
 #ifdef NODEMCU
 //PHYSICAL
-#define CE D3
-#define CSN D4
-#define POTENTIOMETER A0
+  #define CE D3
+  #define CSN D4
+  #define POTENTIOMETER A0
 
-//PCF8574
-#define ANALOG_LEFT_PUSHBUTTON 0
-#define ANALOG_RIGHT_PUSHBUTTON 1
-#define SIDE_SWITCH 2
-#define ROTORY_ENCODER_PUSHBUTTON 3
-#define ROTORY_ENCODER_CLK 4
-#define ROTORY_ENCODER_DT 5
+  //PCF8574
+  #define ANALOG_LEFT_PUSHBUTTON 0
+  #define ANALOG_RIGHT_PUSHBUTTON 1
+  #define SIDE_SWITCH 2
+  #define ROTORY_ENCODER_PUSHBUTTON 3
+  #define ROTORY_ENCODER_CLK 4
+  #define ROTORY_ENCODER_DT 5
 
-//ADS1015
-#define ANALOG_LEFT_X 0
-#define ANALOG_LEFT_Y 1
-#define ANALOG_RIGHT_X 2
-#define ANALOG_RIGHT_Y 3
+  //ADS1015
+  #define ANALOG_LEFT_X 2
+  #define ANALOG_LEFT_Y 3
+  #define ANALOG_RIGHT_X 0
+  #define ANALOG_RIGHT_Y 1
 
 #endif
 
 
 
 #ifdef PROMINI
-#define SIDE_SWITCH 7
-#define ANALOG_LEFT_PUSHBUTTON 2
-#define ANALOG_RIGHT_PUSHBUTTON 3
-#define ROTORY_ENCODER_PUSHBUTTON 4
+  #define SIDE_SWITCH 7
+  #define ANALOG_LEFT_PUSHBUTTON 2
+  #define ANALOG_RIGHT_PUSHBUTTON 3
+  #define ROTORY_ENCODER_PUSHBUTTON 4
 
-#define ANALOG_LEFT_X 0
-#define ANALOG_LEFT_Y 1
+  #define ANALOG_LEFT_X 0
+  #define ANALOG_LEFT_Y 1
 
-#define ANALOG_RIGHT_X 2
-#define ANALOG_RIGHT_Y 3
+  #define ANALOG_RIGHT_X 2
+  #define ANALOG_RIGHT_Y 3
 
-#define POTENTIOMETER 6
+  #define POTENTIOMETER 6
 
-#define ROTORY_ENCODER_CLK 5
-#define ROTORY_ENCODER_DT 6
+  #define ROTORY_ENCODER_CLK 5
+  #define ROTORY_ENCODER_DT 6
 #endif
 
 #define OLED_RESET -1
@@ -185,38 +186,44 @@ byte menu_no = 0;
 void setup()
 {
 
-
-
   //---------------------- DIGITAL REMOTE PINS
   #ifdef NODEMCU
-  prepareOTA();
-  remoteIO.pinMode(SIDE_SWITCH, INPUT_PULLUP);
-  remoteIO.pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
-  remoteIO.pinMode(ANALOG_RIGHT_PUSHBUTTON, INPUT_PULLUP);
+    prepareOTA();
+    remoteAI.setGain(GAIN_TWOTHIRDS);
+    remoteAI.begin();
+    remoteIO.begin(0x20);
+    remoteIO.pinMode(SIDE_SWITCH, INPUT_PULLUP);
+    remoteIO.pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
+    remoteIO.pinMode(ANALOG_RIGHT_PUSHBUTTON, INPUT_PULLUP);
 
-  remoteIO.pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
-  remoteIO.pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
-  remoteIO.pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
+    remoteIO.pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
+    remoteIO.pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
+    remoteIO.pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
   #endif
 
   #ifdef PROMINI
-  pinMode(A4, INPUT_PULLUP);
-  pinMode(A5, INPUT_PULLUP);
-  pinMode(SIDE_SWITCH, INPUT_PULLUP);
-  pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
-  pinMode(ANALOG_RIGHT_PUSHBUTTON, INPUT_PULLUP);
+    pinMode(A4, INPUT_PULLUP);
+    pinMode(A5, INPUT_PULLUP);
+    pinMode(SIDE_SWITCH, INPUT_PULLUP);
+    pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
+    pinMode(ANALOG_RIGHT_PUSHBUTTON, INPUT_PULLUP);
 
-  pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
-  pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
-  pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
+    pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
+    pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
+    pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
   #endif
 
 
-
-  analog_correction.analog_left_X_correct = int(get_memory(0, 1)) - 128;
-  analog_correction.analog_left_Y_correct = int(get_memory(1, 1)) - 128;
-  analog_correction.analog_right_X_correct = int(get_memory(2, 1)) - 128;
-  analog_correction.analog_right_Y_correct = int(get_memory(3, 1)) - 128;
+  #ifdef CALIBRATE
+    // save_memory(0, 1, 128);
+    // save_memory(1, 1, 128);
+    // save_memory(2, 1, 128);
+    // save_memory(3, 1, 128);
+    analog_correction.analog_left_X_correct = int(get_memory(0, 1)) - 128;
+    analog_correction.analog_left_Y_correct = int(get_memory(1, 1)) - 128;
+    analog_correction.analog_right_X_correct = int(get_memory(2, 1)) - 128;
+    analog_correction.analog_right_Y_correct = int(get_memory(3, 1)) - 128;
+  #endif
   radio_channel = get_memory(4, 1);
   control_mode = get_memory(5, 1);
 
@@ -239,14 +246,16 @@ void setup()
 
 
   //---------------------- OLED Display END -----------------
-  calibration();
+  #ifdef CALIBRATE
+    calibration();
+  #endif
 
 }
 
 void loop()
 {
   #ifdef NODEMCU
-  ArduinoOTA.handle();
+    ArduinoOTA.handle();
   #endif
   now = millis();
 
@@ -333,6 +342,13 @@ void loop()
   {
     DisplayUpdateTimer = now;
     display_refresh();    
+  }
+
+
+  if (now - SerialRawTimer > 500)
+  {
+    SerialRawTimer = now;
+    serialPrintRaw();
   }
 
   readRadio(0);

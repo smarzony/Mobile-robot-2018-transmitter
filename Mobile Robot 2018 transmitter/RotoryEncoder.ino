@@ -25,8 +25,15 @@
 
 void rotoryEncoderHandler()
 {
+  #ifdef PROMINI
   rotory_encoder.clk_actual = digitalRead(ROTORY_ENCODER_CLK);
   rotory_encoder.dt_actual = digitalRead(ROTORY_ENCODER_DT);
+  #endif
+
+  #ifdef NODEMCU
+  rotory_encoder.clk_actual = remoteIO.digitalRead(ROTORY_ENCODER_CLK);
+  rotory_encoder.dt_actual = remoteIO.digitalRead(ROTORY_ENCODER_DT);
+  #endif
 
 
     if (rotory_encoder.clk_actual == LOW && rotory_encoder.clk_prev == HIGH)

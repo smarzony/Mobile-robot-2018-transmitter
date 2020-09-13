@@ -33,7 +33,13 @@ void display_refresh()
 	line = line + 10;
 	display.setCursor(column, line);
 	display.print("SID: ");
-	display.println(digitalRead(SIDE_SWITCH));
+	#ifdef PROMINI
+		display.println(digitalRead(SIDE_SWITCH));
+	#endif
+	#ifdef NODEMCU
+		display.println(remoteIO.digitalRead(SIDE_SWITCH));
+	#endif
+
 
 	line = line + 10;
 	display.setCursor(column, line);
@@ -103,11 +109,11 @@ void display_refresh()
 
 	line = line + 10;
 	display.setCursor(column, line);
-//	display.print("DIS: ");
-//	display.println(message_receive.distance);
-  display.print("RSV: ");
-  display.println(rotory_encoder.switch_value);
-  
+	display.print("DIS: ");
+	display.println(message_receive.distance);
+  	// display.print("RSV: ");
+  	// display.println(rotory_encoder.switch_value);
+
 
 
 	// UPPER BOTTOM BAR
