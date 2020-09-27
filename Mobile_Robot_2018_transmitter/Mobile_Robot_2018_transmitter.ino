@@ -1,3 +1,7 @@
+/*
+Mobile robot transmitter code
+Author: Piotr Smarzyński
+*/
 
 #define NODEMCU
 #define WIFI_STATION
@@ -17,6 +21,7 @@
 #include "analog_correction.h"
 #include "radio_data.h"
 #include "calibration.h"
+#include "memory.h"
 
 #ifdef NODEMCU
   #include <jm_PCF8574.h>
@@ -30,8 +35,8 @@
 
 #ifdef NODEMCU
 //PHYSICAL
-  #define CE D3
-  #define CSN D4
+  #define CE D0
+  #define CSN D8
   #define POTENTIOMETER A0
 
   //PCF8574
@@ -95,11 +100,7 @@
 #define BUTTON_DELAY 300
 #define ROTORY_ENCODER_CHANGE_MIN_TIME 50
 
-
-
 //SERIAL OUTPUT
-
-
 
 struct rotoryEncoder {
   bool clk_actual,
@@ -170,7 +171,7 @@ void setup()
   #ifdef NODEMCU
     prepareOTA();
     remoteAI.setGain(GAIN_TWOTHIRDS);
-    remoteAI.begin();
+    // remoteAI.begin();
     remoteIO.begin(0x20);
     remoteIO.pinMode(SIDE_SWITCH, INPUT_PULLUP);
     remoteIO.pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
@@ -202,10 +203,6 @@ void setup()
 
 
   #ifdef CALIBRATE
-    // save_memory(0, 1, 128);
-    // save_memory(1, 1, 128);
-    // save_memory(2, 1, 128);
-    // save_memory(3, 1, 128);
     analog_correction.analog_left_X_correct = int(get_memory(0, 1)) - 128;
     analog_correction.analog_left_Y_correct = int(get_memory(1, 1)) - 128;
     analog_correction.analog_right_X_correct = int(get_memory(2, 1)) - 128;
@@ -252,6 +249,17 @@ void loop()
   buttons[0].actual = remoteIO.digitalRead(buttons[0].no);
   buttons[1].actual = remoteIO.digitalRead(buttons[1].no);
   buttons[2].actual = remoteIO.digitalRead(buttons[2].no);
+
+  readRadio(0);
+  read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state, remoteIO);
+  read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state, remoteIO);
+  read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO);
+  
+  button_hold(buttons[0], rotory_encoder.value_int, substract);
+  button_hold(buttons[2], rotory_encoder.value_int, add);
+
+  if (rotory_encoder.switch_value == 6)
+    calibration(analog_correction);
 
   if (rotory_encoder.switch_value != rotory_encoder.switch_value_old && rotory_encoder.switch_value != 0)
   {
@@ -332,7 +340,7 @@ void loop()
     PrepareMessageTimer = now;
   }
 
-  if (now - DisplayUpdateTimer > 500)
+  if (now - DisplayUpdateTimer > 1000)
   {
     DisplayUpdateTimer = now;
     display_refresh();    
@@ -344,18 +352,6 @@ void loop()
     SerialRawTimer = now;
     serialPrintRaw();
   }
-
-  readRadio(0);
-  read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state, remoteIO);
-  read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state, remoteIO);
-  read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO);
-  
-  button_hold(buttons[0], rotory_encoder.value_int, substract);
-  button_hold(buttons[2], rotory_encoder.value_int, add);
-
-  if (rotory_encoder.switch_value == 6)
-    calibration(analog_correction);
-
 }
 
 void substract(int sub_value, int &input)

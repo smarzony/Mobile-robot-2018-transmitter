@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "pinstate.h"
 #include "jm_PCF8574.h"
+#include "timer.h"
 
 #define BUTTON_DELAY 300
 

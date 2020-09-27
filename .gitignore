@@ -35,3 +35,5 @@ packages/
 *.bin
 *.elf
 build/
+
+*.eep
