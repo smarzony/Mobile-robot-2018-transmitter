@@ -14,6 +14,9 @@
 #include "timer.h"
 #include "pinstate.h"
 #include "buttons.h"
+#include "analog_correction.h"
+#include "radio_data.h"
+#include "calibration.h"
 
 #ifdef NODEMCU
   #include <jm_PCF8574.h>
@@ -96,40 +99,7 @@
 
 //SERIAL OUTPUT
 
-struct analogCorrection {
-  int analog_left_X_correct = 0;
-  int analog_left_Y_correct = 0;
-  int analog_right_X_correct = 0;
-  int analog_right_Y_correct = 0;
-};
 
-struct radioDataTrasnsmit {
-  byte analog_left_X,
-       analog_left_Y,
-       analog_right_X,
-       analog_right_Y,
-       servo_0,
-       led_g,
-       led_b,
-       potentiometer,
-       control_mode,
-       rotory_encoder,
-       bit_array,
-       message_no;
-};
-
-struct radioDataReceive {
-  byte velocity_measured_left,
-       velocity_measured_right,
-       distance,
-       control_mode,
-       time_delay,
-       reserved5,
-       reserved6,
-       reserved7,
-       reserved8,
-       message_no;
-};
 
 struct rotoryEncoder {
   bool clk_actual,
@@ -264,7 +234,7 @@ void setup()
 
   //---------------------- OLED Display END -----------------
   #ifdef CALIBRATE
-    calibration();
+    calibration(analog_correction);
   #endif
 
 }
@@ -376,17 +346,15 @@ void loop()
   }
 
   readRadio(0);
-  // tactileSwitchesHandler();
-  read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state);
-  read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state);
-  read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO.digitalRead);
+  read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state, remoteIO);
+  read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state, remoteIO);
+  read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO);
   
   button_hold(buttons[0], rotory_encoder.value_int, substract);
   button_hold(buttons[2], rotory_encoder.value_int, add);
-  // rotoryEncoderHandler();
 
   if (rotory_encoder.switch_value == 6)
-    calibration();
+    calibration(analog_correction);
 
 }
 
