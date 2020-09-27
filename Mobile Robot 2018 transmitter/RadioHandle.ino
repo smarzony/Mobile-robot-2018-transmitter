@@ -1,3 +1,5 @@
+#include "Arduino.h"
+
 uint8_t byte_limit(int value)
 {
   if (value > 255)

@@ -1,3 +1,5 @@
+#include "Arduino.h"
+
 void display_refresh()
 {
 	display.setTextSize(1);

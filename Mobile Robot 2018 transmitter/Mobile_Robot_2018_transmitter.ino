@@ -10,6 +10,11 @@
 #include <Wire.h>
 #include <EEPROM.h>
 #include <Adafruit_SSD1306.h>
+
+#include "timer.h"
+#include "pinstate.h"
+#include "buttons.h"
+
 #ifdef NODEMCU
   #include <jm_PCF8574.h>
   #include <Adafruit_ADS1015.h>
@@ -33,6 +38,10 @@
   #define ROTORY_ENCODER_PUSHBUTTON 3
   #define ROTORY_ENCODER_CLK 4
   #define ROTORY_ENCODER_DT 5
+
+  #define BUTTON_PLUS 3
+  #define BUTTON_SELECT 4
+  #define BUTTON_MINUS 5
 
   //ADS1015
   #define ANALOG_LEFT_X 2
@@ -148,6 +157,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 #ifdef NODEMCU
 jm_PCF8574 remoteIO(0x20);
 Adafruit_ADS1015 remoteAI; 
+PinState buttons[3];
 #endif
 
 //radio variables
@@ -196,9 +206,16 @@ void setup()
     remoteIO.pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
     remoteIO.pinMode(ANALOG_RIGHT_PUSHBUTTON, INPUT_PULLUP);
 
-    remoteIO.pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
-    remoteIO.pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
-    remoteIO.pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
+    // remoteIO.pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
+    // remoteIO.pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
+    // remoteIO.pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
+
+    remoteIO.pinMode(BUTTON_MINUS, INPUT_PULLUP);
+    remoteIO.pinMode(BUTTON_SELECT, INPUT_PULLUP);
+    remoteIO.pinMode(BUTTON_PLUS, INPUT_PULLUP);
+    buttons[0].no = BUTTON_MINUS;
+    buttons[1].no = BUTTON_SELECT;
+    buttons[2].no = BUTTON_PLUS;
   #endif
 
   #ifdef PROMINI
@@ -258,6 +275,13 @@ void loop()
     ArduinoOTA.handle();
   #endif
   now = millis();
+
+  buttons[0].last = buttons[0].actual;
+  buttons[1].last = buttons[1].actual;
+  buttons[2].last = buttons[2].actual;
+  buttons[0].actual = remoteIO.digitalRead(buttons[0].no);
+  buttons[1].actual = remoteIO.digitalRead(buttons[1].no);
+  buttons[2].actual = remoteIO.digitalRead(buttons[2].no);
 
   if (rotory_encoder.switch_value != rotory_encoder.switch_value_old && rotory_encoder.switch_value != 0)
   {
@@ -352,10 +376,26 @@ void loop()
   }
 
   readRadio(0);
-  tactileSwitchesHandler();
-  rotoryEncoderHandler();
+  // tactileSwitchesHandler();
+  read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state);
+  read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state);
+  read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO.digitalRead);
+  
+  button_hold(buttons[0], rotory_encoder.value_int, substract);
+  button_hold(buttons[2], rotory_encoder.value_int, add);
+  // rotoryEncoderHandler();
 
   if (rotory_encoder.switch_value == 6)
     calibration();
 
+}
+
+void substract(int sub_value, int &input)
+{
+  input = input - sub_value;
+}
+
+void add(int add_value, int &input)
+{
+  input = input + add_value;
 }

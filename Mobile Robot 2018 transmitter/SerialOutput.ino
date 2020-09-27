@@ -1,3 +1,5 @@
+#include "Arduino.h"
+
 void serialPrintRaw()
 {
 	String output;
