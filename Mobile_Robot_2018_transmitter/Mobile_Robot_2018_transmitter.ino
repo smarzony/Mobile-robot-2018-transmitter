@@ -345,8 +345,8 @@ void loop()
 
   if (now - PrepareMessageTimer > 20)
   {
-    prepareOutMessage();
     PrepareMessageTimer = now;
+    prepareOutMessage();    
   }
 
   if (now - DisplayUpdateTimer > 200)
@@ -359,8 +359,8 @@ void loop()
   if (now - SerialRawTimer > 500)
   {
     SerialRawTimer = now;
-    // serialPrintTx(message_transmit);
-    serialPrintPCF(remoteIO);
+    serialPrintTx(message_transmit);
+    // serialPrintPCF(remoteIO);
   }
 }
 
