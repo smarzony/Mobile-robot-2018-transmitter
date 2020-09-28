@@ -22,6 +22,7 @@ Author: Piotr Smarzyński
 #include "radio_data.h"
 #include "calibration.h"
 #include "memory.h"
+#include "serial_print.h"
 
 #ifdef NODEMCU
   #include <jm_PCF8574.h>
@@ -126,7 +127,7 @@ struct radioStruct {
 Adafruit_SSD1306 display(OLED_RESET);
 
 #ifdef NODEMCU
-jm_PCF8574 remoteIO(0x20);
+jm_PCF8574 remoteIO;
 Adafruit_ADS1015 remoteAI; 
 PinState buttons[3];
 #endif
@@ -171,19 +172,26 @@ void setup()
   #ifdef NODEMCU
     prepareOTA();
     remoteAI.setGain(GAIN_TWOTHIRDS);
-    // remoteAI.begin();
+    remoteAI.begin();
     remoteIO.begin(0x20);
+
     remoteIO.pinMode(SIDE_SWITCH, INPUT_PULLUP);
     remoteIO.pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
     remoteIO.pinMode(ANALOG_RIGHT_PUSHBUTTON, INPUT_PULLUP);
-
-    // remoteIO.pinMode(ROTORY_ENCODER_PUSHBUTTON, INPUT_PULLUP);
-    // remoteIO.pinMode(ROTORY_ENCODER_CLK, INPUT_PULLUP);
-    // remoteIO.pinMode(ROTORY_ENCODER_DT, INPUT_PULLUP);
-
     remoteIO.pinMode(BUTTON_MINUS, INPUT_PULLUP);
     remoteIO.pinMode(BUTTON_SELECT, INPUT_PULLUP);
     remoteIO.pinMode(BUTTON_PLUS, INPUT_PULLUP);
+
+    // MANUAL PULLUPS
+    remoteIO.digitalWrite(SIDE_SWITCH, HIGH); 
+    remoteIO.digitalWrite(ANALOG_LEFT_PUSHBUTTON, HIGH);
+    remoteIO.digitalWrite(ANALOG_RIGHT_PUSHBUTTON, HIGH);
+    remoteIO.digitalWrite(BUTTON_MINUS, HIGH);
+    remoteIO.digitalWrite(BUTTON_SELECT, HIGH);
+    remoteIO.digitalWrite(BUTTON_PLUS, HIGH);
+
+
+
     buttons[0].no = BUTTON_MINUS;
     buttons[1].no = BUTTON_SELECT;
     buttons[2].no = BUTTON_PLUS;
@@ -233,6 +241,7 @@ void setup()
   #ifdef CALIBRATE
     calibration(analog_correction);
   #endif
+  Serial.begin(115200);
 
 }
 
@@ -248,7 +257,7 @@ void loop()
   buttons[2].last = buttons[2].actual;
   buttons[0].actual = remoteIO.digitalRead(buttons[0].no);
   buttons[1].actual = remoteIO.digitalRead(buttons[1].no);
-  buttons[2].actual = remoteIO.digitalRead(buttons[2].no);
+  buttons[2].actual = remoteIO.digitalRead(buttons[2].no); 
 
   readRadio(0);
   read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state, remoteIO);
@@ -340,7 +349,7 @@ void loop()
     PrepareMessageTimer = now;
   }
 
-  if (now - DisplayUpdateTimer > 1000)
+  if (now - DisplayUpdateTimer > 200)
   {
     DisplayUpdateTimer = now;
     display_refresh();    
@@ -350,7 +359,8 @@ void loop()
   if (now - SerialRawTimer > 500)
   {
     SerialRawTimer = now;
-    serialPrintRaw();
+    // serialPrintTx(message_transmit);
+    serialPrintPCF(remoteIO);
   }
 }
 
