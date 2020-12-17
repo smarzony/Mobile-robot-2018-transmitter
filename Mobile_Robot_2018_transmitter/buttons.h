@@ -1,4 +1,5 @@
 #pragma once
+#include "Arduino.h"
 #include <stdint.h>
 #include "pinstate.h"
 #include "jm_PCF8574.h"

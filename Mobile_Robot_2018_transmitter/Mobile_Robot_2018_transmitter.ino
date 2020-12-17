@@ -128,6 +128,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 #ifdef NODEMCU
 jm_PCF8574 remoteIO;
+jm_PCF8574 remoteIO1;
 Adafruit_ADS1015 remoteAI; 
 PinState buttons[3];
 #endif
@@ -280,29 +281,24 @@ void readRadio(bool printing)
 }
 
 void setup()
-{
-
+{  
   //---------------------- DIGITAL REMOTE PINS
   #ifdef NODEMCU
+    EEPROM.begin(32);
     prepareOTA();
     remoteAI.setGain(GAIN_TWOTHIRDS);
     remoteAI.begin();
     remoteIO.begin(0x20);
+    remoteIO.begin(0x21);
 
-    remoteIO.pinMode(SIDE_SWITCH, INPUT_PULLUP);
-    remoteIO.pinMode(ANALOG_LEFT_PUSHBUTTON, INPUT_PULLUP);
-    remoteIO.pinMode(ANALOG_RIGHT_PUSHBUTTON, INPUT_PULLUP);
-    remoteIO.pinMode(BUTTON_MINUS, INPUT_PULLUP);
-    remoteIO.pinMode(BUTTON_SELECT, INPUT_PULLUP);
-    remoteIO.pinMode(BUTTON_PLUS, INPUT_PULLUP);
-
-    // MANUAL PULLUPS
-    remoteIO.digitalWrite(SIDE_SWITCH, HIGH); 
-    remoteIO.digitalWrite(ANALOG_LEFT_PUSHBUTTON, HIGH);
-    remoteIO.digitalWrite(ANALOG_RIGHT_PUSHBUTTON, HIGH);
-    remoteIO.digitalWrite(BUTTON_MINUS, HIGH);
-    remoteIO.digitalWrite(BUTTON_SELECT, HIGH);
-    remoteIO.digitalWrite(BUTTON_PLUS, HIGH);
+    for(int pin=0; pin<=7; pin++)
+    {
+      remoteIO.pinMode(pin, INPUT_PULLUP);
+      remoteIO.digitalWrite(pin, HIGH);
+      remoteIO1.pinMode(pin, INPUT_PULLUP);
+      remoteIO1.digitalWrite(pin, HIGH);
+    }
+    // remoteIO1 PIN3 is not working!
 
 
 
@@ -330,8 +326,8 @@ void setup()
     analog_correction.analog_right_X_correct = int(get_memory(2, 1)) - 128;
     analog_correction.analog_right_Y_correct = int(get_memory(3, 1)) - 128;
   #endif
-  // radio_channel = get_memory(4, 1);
-  radio_channel = 0;
+  radio_channel = get_memory(4, 1);
+  // radio_channel = 0;
   control_mode = get_memory(5, 1);
 
   //---------------------- Radio config BEGIN -----------------
