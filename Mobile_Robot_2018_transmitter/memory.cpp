@@ -15,4 +15,5 @@ void save_memory(uint16_t address, uint8_t block_size, uint8_t value)
 	Serial.println("Saved value " + String(value) + " on address " + String(eeAddress));
 	if (value <= 255)
 		EEPROM.put(eeAddress, value);
+		// EEPROM.commit();
 }

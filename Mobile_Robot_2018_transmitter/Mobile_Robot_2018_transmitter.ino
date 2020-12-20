@@ -285,7 +285,7 @@ void setup()
   //---------------------- DIGITAL REMOTE PINS
   #ifdef NODEMCU
     EEPROM.begin(32);
-    prepareOTA();
+    // prepareOTA();
     remoteAI.setGain(GAIN_TWOTHIRDS);
     remoteAI.begin();
     remoteIO.begin(0x20);
@@ -298,6 +298,7 @@ void setup()
       remoteIO1.pinMode(pin, INPUT_PULLUP);
       remoteIO1.digitalWrite(pin, HIGH);
     }
+    // remoteIO  PIN3 is not working!
     // remoteIO1 PIN3 is not working!
 
 
@@ -329,6 +330,18 @@ void setup()
 
   //---------------------- Radio config BEGIN -----------------
 
+  Serial.begin(115200);
+  radio_channel = get_memory(4, 1);
+  if (radio_channel > 120)
+    {
+      radio_channel = 0;
+    }
+  control_mode = get_memory(5, 1);
+  if (control_mode > CONTROLS_AUTONOMUS)
+  {
+    control_mode = CONTROLS_NONE;
+  }
+
   radio.begin();
   radio.setDataRate(RF24_1MBPS);
   radio.setRetries(2, 5);
@@ -349,9 +362,9 @@ void setup()
   #ifdef CALIBRATE
     calibration(analog_correction);
   #endif
-  Serial.begin(115200);
-  radio_channel = get_memory(4, 1);
-  control_mode = get_memory(5, 1);
+
+
+  
   delay(500);  
   Serial.println("\nradio_channel: "+String(radio_channel));
   Serial.println("control_mode: "+String(control_mode));
@@ -361,7 +374,7 @@ void setup()
 void loop()
 {
   #ifdef NODEMCU
-    ArduinoOTA.handle();
+    // ArduinoOTA.handle();
   #endif
   now = millis();
 
@@ -415,45 +428,35 @@ void loop()
   switch (rotory_encoder.switch_value)
   {
     case ROT_PB_EDIT_LX:
-      // read_button_inc_dec_switch(buttons[0].no, buttons[2].no, 0, 255, rotory_encoder.value, remoteIO);
       analog_correction.analog_left_X_correct = rotory_encoder.value;
       save_memory(0, 1, analog_correction.analog_left_X_correct + 128);
       break;
 
     case ROT_PB_EDIT_LY:
-      // read_button_inc_dec_switch(buttons[0].no, buttons[2].no, 0, 255, rotory_encoder.value, remoteIO);
       analog_correction.analog_left_Y_correct = rotory_encoder.value;
       save_memory(1, 1, analog_correction.analog_left_Y_correct + 128);
       break;
 
     case ROT_PB_EDIT_RX:
-      // read_button_inc_dec_switch(buttons[0].no, buttons[2].no, 0, 255, rotory_encoder.value, remoteIO);
       analog_correction.analog_right_X_correct = rotory_encoder.value;
       save_memory(2, 1, analog_correction.analog_right_X_correct + 128);
       break;
 
     case ROT_PB_EDIT_RY:
-      // read_button_inc_dec_switch(buttons[0].no, buttons[2].no, 0, 255, rotory_encoder.value, remoteIO);
       analog_correction.analog_right_Y_correct = rotory_encoder.value;
       save_memory(3, 1, analog_correction.analog_right_Y_correct + 128);
       break;
 
     case ROT_PB_EDIT_CTRL:
-      // if (rotory_encoder.value > 4)
-      //   rotory_encoder.value = 0;
-      // if (rotory_encoder.value < 0)
-      //   rotory_encoder.value = 4;
-      read_button_inc_switch(BUTTON_MINUS, 0, 4, rotory_encoder.value, remoteIO);
+      read_button_dec_switch(BUTTON_MINUS, 0, 4, rotory_encoder.value, remoteIO);
+      read_button_inc_switch(BUTTON_PLUS, 0, 4, rotory_encoder.value, remoteIO);
       control_mode = rotory_encoder.value;
       save_memory(5, 1, control_mode);
       break;
 
     case ROT_PB_EDIT_CH:
-      // if (rotory_encoder.value > 120)
-      //   rotory_encoder.value = 0;
-      // if (rotory_encoder.value < 0)
-      //   rotory_encoder.value = 120;
-      read_button_inc_switch(BUTTON_MINUS, 0, 15, rotory_encoder.value, remoteIO);
+      read_button_dec_switch(BUTTON_MINUS, 0, 15, rotory_encoder.value, remoteIO);
+      read_button_inc_switch(BUTTON_PLUS, 0, 15, rotory_encoder.value, remoteIO);
       radio_channel = rotory_encoder.value;
       save_memory(4, 1, radio_channel);
       break;
@@ -703,4 +706,66 @@ void display_refresh(uint8_t radio_channel)
 
 	display.display();
 	display.clearDisplay();
+}
+
+void prepareOTA()
+{
+    #ifdef WIFI_STATION
+    const char* ssid = "smarzony";
+    const char* password = "metalisallwhatineed";
+    WiFi.mode(WIFI_STA);
+    #endif
+    #ifdef WIFI_ACCESS_POINT
+    const char* ssid = "RC Transmitter";
+    const char* password = "smarzony";
+    WiFi.softAP(ssid, password);
+    #endif
+    WiFi.begin(ssid, password);
+    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+        Serial.println("Connection Failed! Rebooting...");
+        delay(5000);
+        ESP.restart();
+    }
+
+    // Port defaults to 8266
+    // ArduinoOTA.setPort(8266);
+
+    // Hostname defaults to esp8266-[ChipID]
+    ArduinoOTA.setHostname("RC");
+
+    // No authentication by default
+    // ArduinoOTA.setPassword("admin");
+
+    // Password can be set with it's md5 value as well
+    // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+    // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+    ArduinoOTA.onStart([]() {
+        String type;
+        if (ArduinoOTA.getCommand() == U_FLASH)
+            type = "sketch";
+        else // U_SPIFFS
+            type = "filesystem";
+
+        // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+        Serial.println("Start updating " + type);
+    });
+    ArduinoOTA.onEnd([]() {
+        Serial.println("\nEnd");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+        Serial.printf("Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+        else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+    ArduinoOTA.begin();
+    Serial.println("Ready");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
 }
