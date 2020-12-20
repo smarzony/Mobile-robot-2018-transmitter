@@ -26,11 +26,67 @@ void read_button_inc_switch(uint8_t button, uint8_t limit_min, uint8_t limit_max
       return;
     if (remoteIO.digitalRead(button) == 0)
     {
-      state += 1;
+      state += 1;      
       if (state > limit_max)
       {
         state = limit_min;
       } 
+      Serial.println("Button "+ String(button) + ": " + String(state));
+    }
+    lastTime = timeNow;
+  }
+}
+
+void read_button_dec_switch(uint8_t button, uint8_t limit_min, uint8_t limit_max, uint8_t &state, jm_PCF8574 &remoteIO)
+{
+  static unsigned long lastTime;
+  unsigned long timeNow = millis();
+  if (remoteIO.digitalRead(button) == 0) {
+    if (timeNow - lastTime < BUTTON_DELAY)
+      return;
+    if (remoteIO.digitalRead(button) == 0)
+    {
+      state -= 1;
+      if (state < limit_min)
+      {
+        state = limit_max;
+      } 
+      Serial.println("Button "+ String(button) + ": " + String(state));
+    }
+    lastTime = timeNow;
+  }
+}
+
+void read_button_inc_dec_switch(uint8_t button, uint8_t button1, uint8_t limit_min, uint8_t limit_max, uint8_t& state, jm_PCF8574 &remoteIO)
+{
+  static unsigned long lastTime;
+  unsigned long timeNow = millis();
+  if (remoteIO.digitalRead(button) == 0) {
+    if (timeNow - lastTime < BUTTON_DELAY)
+      return;
+    if (remoteIO.digitalRead(button) == 0)
+    {
+      if(state > 0)
+      {
+        state -= 1;  
+      }
+      else
+      {
+        state = limit_max;  
+      }
+      Serial.println("Button "+ String(button) + ": " + String(state));   
+    }
+    if (remoteIO.digitalRead(button1) == 0)
+    {
+      if(state < limit_max)
+      {
+        state += 1; 
+      }
+      else
+      {
+        state = limit_min;
+      }  
+      Serial.println("Button "+ String(button) + ": " + String(state));       
     }
     lastTime = timeNow;
   }
