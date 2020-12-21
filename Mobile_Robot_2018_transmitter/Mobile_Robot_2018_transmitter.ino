@@ -48,7 +48,7 @@ Author: Piotr Smarzyński
   #define ROTORY_ENCODER_CLK 4
   #define ROTORY_ENCODER_DT 5
 
-  #define BUTTON_PLUS 6
+  #define BUTTON_PLUS 3
   #define BUTTON_SELECT 4
   #define BUTTON_MINUS 5
 
@@ -165,6 +165,7 @@ rotoryEncoder rotory_encoder;
 analogCorrection analog_correction;
 
 byte menu_no = 0;
+uint8_t print_counter = 0;
 
 void prepareOutMessage()
 {
@@ -289,14 +290,16 @@ void setup()
     remoteAI.setGain(GAIN_TWOTHIRDS);
     remoteAI.begin();
     remoteIO.begin(0x20);
-    remoteIO.begin(0x21);
+    remoteIO1.begin(0x21);
 
     for(int pin=0; pin<=7; pin++)
     {
       remoteIO.pinMode(pin, INPUT_PULLUP);
       remoteIO.digitalWrite(pin, HIGH);
+      delay(50);
       remoteIO1.pinMode(pin, INPUT_PULLUP);
       remoteIO1.digitalWrite(pin, HIGH);
+      delay(50);
     }
     // remoteIO  PIN3 is not working!
     // remoteIO1 PIN3 is not working!
@@ -483,7 +486,12 @@ void loop()
     // serialPrintTx(message_transmit);
     // serialPrintPCF(remoteIO);
     // Serial.println("radio_connected: "+String(radio.isChipConnected()));
+    Serial.println(print_counter);
+    print_counter++;
+    print_io2();
   }
+
+
 }
 
 void substract(int sub_value, int &input)
