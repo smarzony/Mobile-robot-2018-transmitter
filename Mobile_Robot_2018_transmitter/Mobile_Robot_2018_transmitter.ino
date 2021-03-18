@@ -41,16 +41,16 @@ Author: Piotr Smarzyński
   #define POTENTIOMETER A0
 
   //PCF8574
-  #define ANALOG_LEFT_PUSHBUTTON 0
-  #define ANALOG_RIGHT_PUSHBUTTON 1
+  #define ANALOG_LEFT_PUSHBUTTON 7
+  #define ANALOG_RIGHT_PUSHBUTTON 6
   #define SIDE_SWITCH 2
   #define ROTORY_ENCODER_PUSHBUTTON 3
   #define ROTORY_ENCODER_CLK 4
   #define ROTORY_ENCODER_DT 5
 
-  #define BUTTON_PLUS 3
-  #define BUTTON_SELECT 4
-  #define BUTTON_MINUS 5
+  #define BUTTON_PLUS 2
+  #define BUTTON_SELECT 1
+  #define BUTTON_MINUS 1
 
   //ADS1015
   #define ANALOG_LEFT_X 2
@@ -125,6 +125,8 @@ struct radioStruct {
 };
 
 Adafruit_SSD1306 display(OLED_RESET);
+
+
 
 #ifdef NODEMCU
 jm_PCF8574 remoteIO;
@@ -288,7 +290,7 @@ void setup()
     EEPROM.begin(32);
     // prepareOTA();
     remoteAI.setGain(GAIN_TWOTHIRDS);
-    remoteAI.begin();
+    remoteAI.begin(); // 0x48
     remoteIO.begin(0x20);
     remoteIO1.begin(0x21);
 
@@ -389,8 +391,8 @@ void loop()
   buttons[2].actual = remoteIO.digitalRead(buttons[2].no); 
 
   readRadio(0);
-  read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state, remoteIO);
-  read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state, remoteIO);
+  read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state, remoteIO1);
+  read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state, remoteIO1);
   read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO);  
   // button_hold(buttons[0], rotory_encoder.value_int, substract);
   // button_hold(buttons[2], rotory_encoder.value_int, add);
@@ -483,12 +485,12 @@ void loop()
   if (now - SerialRawTimer > 500)
   {
     SerialRawTimer = now;
-    // serialPrintTx(message_transmit);
-    // serialPrintPCF(remoteIO);
+    // serialPrintTx(message_transmit);    
     // Serial.println("radio_connected: "+String(radio.isChipConnected()));
-    Serial.println(print_counter);
+    // Serial.println(print_counter);
     print_counter++;
     print_io2();
+    Serial.println();
   }
 
 
@@ -673,6 +675,18 @@ void display_refresh(uint8_t radio_channel)
 		display.print("CALIBRATION");
 		display.setTextColor(WHITE);
 	}
+
+  line = 47;
+	column = 10;
+  for (int x = 5; x >= 0; x--)
+  { 
+    if (remoteIO1.digitalRead(x) == 0)
+    {
+      display.drawCircle(80- (x*10 + 10), 51, 3, WHITE);
+    }
+
+  }
+  
 
 	// BOTTOM BAR
 	line = 57;

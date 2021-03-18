@@ -13,6 +13,7 @@ struct radioDataTrasnsmit {
        control_mode,
        rotory_encoder,
        bit_array,
+       //bit_array2,
        message_no;
 };
 
