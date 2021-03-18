@@ -50,7 +50,7 @@ Author: Piotr Smarzyński
 
   #define BUTTON_PLUS 2
   #define BUTTON_SELECT 1
-  #define BUTTON_MINUS 1
+  #define BUTTON_MINUS 0
 
   //ADS1015
   #define ANALOG_LEFT_X 2
@@ -103,6 +103,12 @@ Author: Piotr Smarzyński
 
 //SERIAL OUTPUT
 
+struct menu {
+  int option;
+  int selected;
+  int value;
+};
+
 struct rotoryEncoder {
   bool clk_actual,
        clk_prev,
@@ -132,7 +138,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 jm_PCF8574 remoteIO;
 jm_PCF8574 remoteIO1;
 Adafruit_ADS1015 remoteAI; 
-PinState buttons[3];
+PinState button_minus, button_select, button_plus;
 #endif
 
 //radio variables
@@ -168,6 +174,7 @@ analogCorrection analog_correction;
 
 byte menu_no = 0;
 uint8_t print_counter = 0;
+menu gui_menu;
 
 void prepareOutMessage()
 {
@@ -291,6 +298,7 @@ void setup()
     // prepareOTA();
     remoteAI.setGain(GAIN_TWOTHIRDS);
     remoteAI.begin(); // 0x48
+
     remoteIO.begin(0x20);
     remoteIO1.begin(0x21);
 
@@ -303,14 +311,15 @@ void setup()
       remoteIO1.digitalWrite(pin, HIGH);
       delay(50);
     }
-    // remoteIO  PIN3 is not working!
     // remoteIO1 PIN3 is not working!
 
+    // buttons[0].no = BUTTON_MINUS;
+    // buttons[1].no = BUTTON_SELECT;
+    // buttons[2].no = BUTTON_PLUS;
 
-
-    buttons[0].no = BUTTON_MINUS;
-    buttons[1].no = BUTTON_SELECT;
-    buttons[2].no = BUTTON_PLUS;
+    button_minus.no = BUTTON_MINUS;
+    button_select.no = BUTTON_SELECT;
+    button_plus.no = BUTTON_PLUS;
   #endif
 
   #ifdef PROMINI
@@ -374,6 +383,8 @@ void setup()
   Serial.println("\nradio_channel: "+String(radio_channel));
   Serial.println("control_mode: "+String(control_mode));
 
+  gui_menu.option = 0;
+
 }
 
 void loop()
@@ -383,91 +394,101 @@ void loop()
   #endif
   now = millis();
 
-  buttons[0].last = buttons[0].actual;
-  buttons[1].last = buttons[1].actual;
-  buttons[2].last = buttons[2].actual;
-  buttons[0].actual = remoteIO.digitalRead(buttons[0].no);
-  buttons[1].actual = remoteIO.digitalRead(buttons[1].no);
-  buttons[2].actual = remoteIO.digitalRead(buttons[2].no); 
+  // buttons[0].last = buttons[0].actual;
+  // buttons[1].last = buttons[1].actual;
+  // buttons[2].last = buttons[2].actual;
+  // buttons[0].actual = remoteIO.digitalRead(buttons[0].no);
+  // buttons[1].actual = remoteIO.digitalRead(buttons[1].no);
+  // buttons[2].actual = remoteIO.digitalRead(buttons[2].no); 
+
+  button_minus.last = button_minus.actual;
+  button_select.last = button_select.actual;
+  button_plus.last = button_plus.actual;
+  button_minus.actual = remoteIO.digitalRead(button_minus.no);
+  button_select.actual = remoteIO.digitalRead(button_select.no);
+  button_plus.actual = remoteIO.digitalRead(button_plus.no); 
+
 
   readRadio(0);
   read_button_neg_switch(ANALOG_LEFT_PUSHBUTTON, analog_left_switch_state, remoteIO1);
   read_button_neg_switch(ANALOG_RIGHT_PUSHBUTTON, analog_right_switch_state, remoteIO1);
-  read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO);  
-  // button_hold(buttons[0], rotory_encoder.value_int, substract);
-  // button_hold(buttons[2], rotory_encoder.value_int, add);
 
-  if (rotory_encoder.switch_value == 6)
-    calibration(analog_correction);
+  menu();
 
-  if (rotory_encoder.switch_value != rotory_encoder.switch_value_old && rotory_encoder.switch_value != 0)
-  {
-    switch (rotory_encoder.switch_value)
-    {
-      case ROT_PB_EDIT_LX:
-        rotory_encoder.value = analog_correction.analog_left_X_correct;
-        break;
+  // read_button_inc_switch(BUTTON_SELECT, 0, ROTORY_ENCODER_SWITCH_MAX, rotory_encoder.switch_value, remoteIO);  
 
-      case ROT_PB_EDIT_LY:
-        rotory_encoder.value = analog_correction.analog_left_Y_correct;
-        break;
 
-      case ROT_PB_EDIT_RX:
-        rotory_encoder.value = analog_correction.analog_right_X_correct;
-        break;
+  // if (rotory_encoder.switch_value == 6)
+  //   calibration(analog_correction);
 
-      case ROT_PB_EDIT_RY:
-        rotory_encoder.value = analog_correction.analog_right_Y_correct;
-        break;
+  // if (rotory_encoder.switch_value != rotory_encoder.switch_value_old && rotory_encoder.switch_value != 0)
+  // {
+  //   switch (rotory_encoder.switch_value)
+  //   {
+  //     case ROT_PB_EDIT_LX:
+  //       rotory_encoder.value = analog_correction.analog_left_X_correct;
+  //       break;
 
-      case ROT_PB_EDIT_CTRL:
-        rotory_encoder.value = control_mode;
-        break;
+  //     case ROT_PB_EDIT_LY:
+  //       rotory_encoder.value = analog_correction.analog_left_Y_correct;
+  //       break;
 
-      case ROT_PB_EDIT_CH:
-        rotory_encoder.value = radio_channel;
-        break;
-    }
-  }
+  //     case ROT_PB_EDIT_RX:
+  //       rotory_encoder.value = analog_correction.analog_right_X_correct;
+  //       break;
 
-  switch (rotory_encoder.switch_value)
-  {
-    case ROT_PB_EDIT_LX:
-      analog_correction.analog_left_X_correct = rotory_encoder.value;
-      save_memory(0, 1, analog_correction.analog_left_X_correct + 128);
-      break;
+  //     case ROT_PB_EDIT_RY:
+  //       rotory_encoder.value = analog_correction.analog_right_Y_correct;
+  //       break;
 
-    case ROT_PB_EDIT_LY:
-      analog_correction.analog_left_Y_correct = rotory_encoder.value;
-      save_memory(1, 1, analog_correction.analog_left_Y_correct + 128);
-      break;
+  //     case ROT_PB_EDIT_CTRL:
+  //       rotory_encoder.value = control_mode;
+  //       break;
 
-    case ROT_PB_EDIT_RX:
-      analog_correction.analog_right_X_correct = rotory_encoder.value;
-      save_memory(2, 1, analog_correction.analog_right_X_correct + 128);
-      break;
+  //     case ROT_PB_EDIT_CH:
+  //       rotory_encoder.value = radio_channel;
+  //       break;
+  //   }
+  // }
 
-    case ROT_PB_EDIT_RY:
-      analog_correction.analog_right_Y_correct = rotory_encoder.value;
-      save_memory(3, 1, analog_correction.analog_right_Y_correct + 128);
-      break;
+  // switch (rotory_encoder.switch_value)
+  // {
+  //   case ROT_PB_EDIT_LX:
+  //     analog_correction.analog_left_X_correct = rotory_encoder.value;
+  //     save_memory(0, 1, analog_correction.analog_left_X_correct + 128);
+  //     break;
 
-    case ROT_PB_EDIT_CTRL:
-      read_button_dec_switch(BUTTON_MINUS, 0, 4, rotory_encoder.value, remoteIO);
-      read_button_inc_switch(BUTTON_PLUS, 0, 4, rotory_encoder.value, remoteIO);
-      control_mode = rotory_encoder.value;
-      save_memory(5, 1, control_mode);
-      break;
+  //   case ROT_PB_EDIT_LY:
+  //     analog_correction.analog_left_Y_correct = rotory_encoder.value;
+  //     save_memory(1, 1, analog_correction.analog_left_Y_correct + 128);
+  //     break;
 
-    case ROT_PB_EDIT_CH:
-      read_button_dec_switch(BUTTON_MINUS, 0, 15, rotory_encoder.value, remoteIO);
-      read_button_inc_switch(BUTTON_PLUS, 0, 15, rotory_encoder.value, remoteIO);
-      radio_channel = rotory_encoder.value;
-      save_memory(4, 1, radio_channel);
-      break;
+  //   case ROT_PB_EDIT_RX:
+  //     analog_correction.analog_right_X_correct = rotory_encoder.value;
+  //     save_memory(2, 1, analog_correction.analog_right_X_correct + 128);
+  //     break;
 
-  }
-  rotory_encoder.switch_value_old = rotory_encoder.switch_value;
+  //   case ROT_PB_EDIT_RY:
+  //     analog_correction.analog_right_Y_correct = rotory_encoder.value;
+  //     save_memory(3, 1, analog_correction.analog_right_Y_correct + 128);
+  //     break;
+
+  //   case ROT_PB_EDIT_CTRL:
+  //     read_button_dec_switch(BUTTON_MINUS, 0, 4, rotory_encoder.value, remoteIO);
+  //     read_button_inc_switch(BUTTON_PLUS, 0, 4, rotory_encoder.value, remoteIO);
+  //     control_mode = rotory_encoder.value;
+  //     save_memory(5, 1, control_mode);
+  //     break;
+
+  //   case ROT_PB_EDIT_CH:
+  //     read_button_dec_switch(BUTTON_MINUS, 0, 15, rotory_encoder.value, remoteIO);
+  //     read_button_inc_switch(BUTTON_PLUS, 0, 15, rotory_encoder.value, remoteIO);
+  //     radio_channel = rotory_encoder.value;
+  //     save_memory(4, 1, radio_channel);
+  //     break;
+
+  // }
+  // rotory_encoder.switch_value_old = rotory_encoder.switch_value;
 
   if (now - PrepareMessageTimer > 20)
   {
@@ -542,10 +563,10 @@ void display_refresh(uint8_t radio_channel)
 	display.setCursor(column, line);
 	display.print("SID: ");
 	#ifdef PROMINI
-		display.println(digitalRead(SIDE_SWITCH));
+		// display.println(digitalRead(SIDE_SWITCH));
 	#endif
 	#ifdef NODEMCU
-		display.println(remoteIO.digitalRead(SIDE_SWITCH));
+		// display.println(remoteIO.digitalRead(SIDE_SWITCH));
 	#endif
 
 
@@ -619,65 +640,27 @@ void display_refresh(uint8_t radio_channel)
 	display.setCursor(column, line);
 	display.print("DIS: ");
 	display.println(message_receive.distance);
-  	// display.print("RSV: ");
-  	// display.println(rotory_encoder.switch_value);
-
-
-
-	// UPPER BOTTOM BAR
-//	
-//	if (rotory_encoder.switch_value > 0 && rotory_encoder.switch_value <= ROTORY_ENCODER_SWITCH_MAX)
-//	{
-//		line = 48;
-//		column = 0;
-//		space = 20;
-//
-//		display.setCursor(column, line);
-//		display.print("MEM: ");
-//
-//		column = column + 24;
-//		display.setCursor(column, line);
-//		display.setTextColor(BLACK, WHITE);
-//		display.print(get_memory(0, 1));
-//		display.setTextColor(WHITE);
-//
-//		column = column + space;
-//		display.setCursor(column, line);
-//		display.setTextColor(BLACK, WHITE);
-//		display.print(get_memory(1, 1));
-//		display.setTextColor(WHITE);
-//
-//		column = column + space;
-//		display.setCursor(column, line);
-//		display.setTextColor(BLACK, WHITE);
-//		display.print(get_memory(2, 1));
-//		display.setTextColor(WHITE);
-//
-//		column = column + space;
-//		display.setCursor(column, line);
-//		display.setTextColor(BLACK, WHITE);
-//		display.print(get_memory(3, 1));
-//		display.setTextColor(WHITE);
-//
-//		column = column + space;
-//		display.setCursor(column, line);
-//		display.setTextColor(BLACK, WHITE);
-//		display.print(get_memory(4, 1));
-//		display.setTextColor(WHITE);
-//	}
 	
-	if (rotory_encoder.switch_value == ROTORY_ENCODER_SWITCH_MAX + 1)
-	{
-		line = 47;
-		column = 20;
-		display.setCursor(column, line);
-		display.setTextColor(BLACK, WHITE);
-		display.print("CALIBRATION");
-		display.setTextColor(WHITE);
-	}
+  line = 47;
+	column = 85;
+  display.setCursor(column, line);
+  display.setTextColor(WHITE);
+  display.print(gui_menu.option);
 
   line = 47;
-	column = 10;
+	column = 100;
+  display.setCursor(column, line);
+  display.setTextColor(WHITE);
+  display.print(gui_menu.selected);
+
+  line = 47;
+	column = 115;
+  display.setCursor(column, line);
+  display.setTextColor(WHITE);
+  display.print(gui_menu.value);
+
+
+
   for (int x = 5; x >= 0; x--)
   { 
     if (remoteIO1.digitalRead(x) == 0)
@@ -790,4 +773,46 @@ void prepareOTA()
     Serial.println("Ready");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+}
+
+void menu()
+{
+  if (button_plus.rising() && gui_menu.selected == 0)
+  {
+    gui_menu.option++;
+  }
+
+  if (button_minus.rising() && gui_menu.selected == 0)
+  {
+    gui_menu.option--;
+  }
+
+  if (button_plus.rising() && gui_menu.selected != 0)
+  {
+    gui_menu.value++;
+  }
+
+  if (button_minus.rising() && gui_menu.selected != 0)
+  {
+    gui_menu.value--;
+  }
+
+  if (button_select.rising() && gui_menu.selected == 0)
+  {
+    gui_menu.selected = gui_menu.option;
+  }
+
+  else if (button_select.rising() && gui_menu.selected != 0)
+  {
+    gui_menu.selected = 0;
+  }
+
+  if (gui_menu.option < 0)
+    {
+      gui_menu.option = MENU_SIZE;
+    }
+  else if (gui_menu.option > MENU_SIZE)
+    {
+      gui_menu.option = 0;
+    }
 }
