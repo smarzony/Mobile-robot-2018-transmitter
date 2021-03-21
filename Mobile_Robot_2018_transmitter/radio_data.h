@@ -6,14 +6,13 @@ struct radioDataTrasnsmit {
        analog_left_Y,
        analog_right_X,
        analog_right_Y,
-       servo_0,
-       led_g,
-       led_b,
+       reserved0,
+       reserved1,
+       reserved2,
        potentiometer,
        control_mode,
-       rotory_encoder,
+       reserved3,
        bit_array,
-       //bit_array2,
        message_no;
 };
 
