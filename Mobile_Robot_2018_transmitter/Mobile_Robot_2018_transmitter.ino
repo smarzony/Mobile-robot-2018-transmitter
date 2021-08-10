@@ -83,18 +83,18 @@ Author: Piotr Smarzyński
 #define OLED_RESET -1
 
 #define CONTROLS_NONE 0
-#define CONTROLS_STANDARD 1
-#define CONTROLS_ENCHANCED 2
+#define CONTROLS_TANK 1
+#define CONTROLS_CAR 2
 #define CONTROLS_MEASURED 3
 #define CONTROLS_AUTONOMUS 4
 
-#define MENU_OPT_CALIBRATION_LX 1
-#define MENU_OPT_CALIBRATION_LY 2
-#define MENU_OPT_CALIBRATION_RX 3
-#define MENU_OPT_CALIBRATION_RY 4
-#define MENU_OPT_CTRL_MODE 5
-#define MENU_OPT_CHANNEL 6
-#define MENU_SIZE 6
+#define MENU_OPT_CALIBRATION_LX 3
+#define MENU_OPT_CALIBRATION_LY 4
+#define MENU_OPT_CALIBRATION_RX 5
+#define MENU_OPT_CALIBRATION_RY 6
+#define MENU_OPT_CTRL_MODE 1
+#define MENU_OPT_CHANNEL 2
+#define MENU_SIZE 2
 
 #define EEPROM_CORRECTION_LX 0
 #define EEPROM_CORRECTION_LY 1
@@ -116,7 +116,11 @@ Author: Piotr Smarzyński
 #define BUTTON_DELAY 300
 #define ROTORY_ENCODER_CHANGE_MIN_TIME 50
 
-//SERIAL OUTPUT
+union u_double
+{
+    float  dbl;
+    char    data[sizeof(double)];
+};
 
 struct menu {
   int option;
@@ -160,6 +164,8 @@ PinState button_minus, button_select, button_plus;
 //radio variables
 radioDataTrasnsmit message_transmit;
 radioDataReceive message_receive;
+union u_double position_latitude;
+union u_double position_longtitude;
 radioStruct radioData;
 uint8_t radio_channel = 0;
 uint8_t control_mode = 1;
@@ -170,6 +176,7 @@ const byte rxAddr[6] = { '1', 'N', 'o', 'd', 'e', '2' };
 
 byte outcoming_message[6];
 byte message_counter = 0;
+
 
 unsigned long now,
          last_message_send,
@@ -246,21 +253,28 @@ void prepareOutMessage()
     message_transmit.analog_right_Y = byte_limit(value_send);
   #endif
   
+  if (remoteIO1.digitalRead(0) == 0) // reverse controls
+  {
+    message_transmit.analog_left_X = 255 - message_transmit.analog_left_X;
+    message_transmit.analog_left_Y = 255 - message_transmit.analog_left_Y;
+    message_transmit.analog_right_X = 255 - message_transmit.analog_right_X;
+    message_transmit.analog_right_Y = 255 - message_transmit.analog_right_Y;
+  }
 
   message_transmit.control_mode = control_mode;
 
   message_transmit.potentiometer = analogRead(POTENTIOMETER) / 4;
   // Some magic to set bits in byte
 
-  message_transmit.bit_array ^= (-analog_left_switch_state ^ message_transmit.bit_array) & (1UL << 1);
-  message_transmit.bit_array ^= (-analog_right_switch_state ^ message_transmit.bit_array) & (1UL << 2);
+  message_transmit.bit_array ^= (-analog_left_switch_state ^ message_transmit.bit_array) & (1UL << 0);
+  message_transmit.bit_array ^= (-analog_right_switch_state ^ message_transmit.bit_array) & (1UL << 1);
 
-  message_transmit.bit_array ^= (-remoteIO1.digitalRead(0) ^ message_transmit.bit_array) & (1UL << 3);
-  message_transmit.bit_array ^= (-remoteIO1.digitalRead(0) ^ message_transmit.bit_array) & (1UL << 4);
-  message_transmit.bit_array ^= (-remoteIO1.digitalRead(0) ^ message_transmit.bit_array) & (1UL << 5);
-  message_transmit.bit_array ^= (-remoteIO1.digitalRead(0) ^ message_transmit.bit_array) & (1UL << 6);
-  message_transmit.bit_array ^= (-remoteIO1.digitalRead(0) ^ message_transmit.bit_array) & (1UL << 7);
-  message_transmit.bit_array ^= (-remoteIO1.digitalRead(0) ^ message_transmit.bit_array) & (1UL << 8);
+  message_transmit.bit_array ^= (-remoteIO1.digitalRead(0) ^ message_transmit.bit_array) & (1UL << 2);
+  message_transmit.bit_array ^= (-remoteIO1.digitalRead(1) ^ message_transmit.bit_array) & (1UL << 3);
+  message_transmit.bit_array ^= (-remoteIO1.digitalRead(2) ^ message_transmit.bit_array) & (1UL << 4);
+  message_transmit.bit_array ^= (-remoteIO1.digitalRead(3) ^ message_transmit.bit_array) & (1UL << 5);
+  message_transmit.bit_array ^= (-remoteIO1.digitalRead(4) ^ message_transmit.bit_array) & (1UL << 6);
+  message_transmit.bit_array ^= (-remoteIO1.digitalRead(5) ^ message_transmit.bit_array) & (1UL << 7);
 
 
 
@@ -285,6 +299,15 @@ void readRadio()
   {
     radioData.last_message_no = radioData.current_message_no;
     radio.read(&message_receive, sizeof(message_receive));
+    position_latitude.data[0] = message_receive.pos_lat[0];
+    position_latitude.data[1] = message_receive.pos_lat[1];
+    position_latitude.data[2] = message_receive.pos_lat[2];
+    position_latitude.data[3] = message_receive.pos_lat[3];
+
+    position_longtitude.data[0] = message_receive.pos_long[0];
+    position_longtitude.data[1] = message_receive.pos_long[1];
+    position_longtitude.data[2] = message_receive.pos_long[2];
+    position_longtitude.data[3] = message_receive.pos_long[3];
     radioData.current_message_no = message_receive.message_no;
     radioData.messages_lost = radioData.current_message_no - radioData.last_message_no - 1;
     radioData.radio_not_availalble = 0;
@@ -431,8 +454,28 @@ void loop()
   if (now - SerialRawTimer > 500)
   {
     SerialRawTimer = now;
-    print_io2();
-    Serial.println();
+    // print_io2();
+    // print_rx_message();
+    // print_rx_coords(position_latitude.dbl, position_longtitude.dbl);
+    Serial.print(position_latitude.dbl);
+    Serial.print("\t");
+    Serial.print(position_latitude.data[0]);
+    Serial.print("\t");
+    Serial.print(position_latitude.data[1]);
+    Serial.print("\t");
+    Serial.print(position_latitude.data[2]);
+    Serial.print("\t");
+    Serial.print(position_latitude.data[3]);
+    Serial.print("\t\t");
+    Serial.print(position_longtitude.dbl);
+    Serial.print("\t");
+    Serial.print(position_longtitude.data[0]);
+    Serial.print("\t");
+    Serial.print(position_longtitude.data[1]);
+    Serial.print("\t");
+    Serial.print(position_longtitude.data[2]);
+    Serial.print("\t");
+    Serial.println(position_longtitude.data[3]);
   }
 }
 
@@ -445,22 +488,31 @@ void display_refresh(uint8_t radio_channel)
 	byte column = 0;
 	byte line = 0;
 
-	display.setCursor(column, line);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_LX)
-		display.setTextColor(BLACK, WHITE);
-	display.print("LX : ");
-	display.println(message_transmit.analog_left_X);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_LX)
-		display.setTextColor(WHITE);
+	// display.setCursor(column, line);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_LX)
+	// 	display.setTextColor(BLACK, WHITE);
+	// display.print("LX : ");
+	// display.println(message_transmit.analog_left_X);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_LX)
+	// 	display.setTextColor(WHITE);
+
+  display.setCursor(column, line);
+	display.print("LAT : ");
+	display.println(position_latitude.dbl, 8);
+
 
 	line = line + 10;
+	// display.setCursor(column, line);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_LY)
+	// 	display.setTextColor(BLACK, WHITE);
+	// display.print("LY : ");
+	// display.println(message_transmit.analog_left_Y);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_LY)
+	// 	display.setTextColor(WHITE);
+
 	display.setCursor(column, line);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_LY)
-		display.setTextColor(BLACK, WHITE);
-	display.print("LY : ");
-	display.println(message_transmit.analog_left_Y);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_LY)
-		display.setTextColor(WHITE);
+	display.print("LNG : ");
+	display.println(position_longtitude.dbl, 8);
 
 	line = line + 10;
 	display.setCursor(column, line);
@@ -471,12 +523,12 @@ void display_refresh(uint8_t radio_channel)
 	String output;
 	switch (control_mode)
 	{
-    case CONTROLS_STANDARD:
-      output = "STD";
+    case CONTROLS_TANK:
+      output = "TANK";
       break;
 
-    case CONTROLS_ENCHANCED:
-      output = "ENCH";
+    case CONTROLS_CAR:
+      output = "CAR";
       break;
 
     case CONTROLS_MEASURED:
@@ -507,22 +559,22 @@ void display_refresh(uint8_t radio_channel)
 	column = 64;
 	line = 0;
 
-	display.setCursor(column, line);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_RX)
-		display.setTextColor(BLACK, WHITE);
-	display.print("RX : ");	
-	display.println(message_transmit.analog_right_X);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_RX)
-		display.setTextColor(WHITE);
+	// display.setCursor(column, line);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_RX)
+	// 	display.setTextColor(BLACK, WHITE);
+	// display.print("RX : ");	
+	// display.println(message_transmit.analog_right_X);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_RX)
+	// 	display.setTextColor(WHITE);
 
 	line = line + 10;
-	display.setCursor(column, line);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_RY)
-		display.setTextColor(BLACK, WHITE);
-	display.print("RY : ");	
-	display.println(message_transmit.analog_right_Y);
-	if (gui_menu.option == MENU_OPT_CALIBRATION_RY)
-		display.setTextColor(WHITE);
+	// display.setCursor(column, line);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_RY)
+	// 	display.setTextColor(BLACK, WHITE);
+	// display.print("RY : ");	
+	// display.println(message_transmit.analog_right_Y);
+	// if (gui_menu.option == MENU_OPT_CALIBRATION_RY)
+	// 	display.setTextColor(WHITE);
 
 	line = line + 10;
 	display.setCursor(column, line);
@@ -533,6 +585,11 @@ void display_refresh(uint8_t radio_channel)
 	display.setCursor(column, line);
 	display.print("DIS: ");
 	display.println(message_receive.distance);
+
+	line = line + 10;
+	display.setCursor(column, line);
+	display.print("AZI: ");
+	display.println(((message_receive.azimuth2 << 8) + message_receive.azimuth1));
   
 	// BOTTOM BAR
 	line = 57;

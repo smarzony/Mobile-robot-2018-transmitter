@@ -17,14 +17,14 @@ struct radioDataTrasnsmit {
 };
 
 struct radioDataReceive {
-  byte velocity_measured_left,
+  uint8_t velocity_measured_left,
        velocity_measured_right,
        distance,
        control_mode,
        time_delay,
-       reserved5,
-       reserved6,
-       reserved7,
-       reserved8,
+       azimuth1,
+       azimuth2,
        message_no;
+  uint8_t pos_lat[4];
+  uint8_t pos_long[4];       
 };

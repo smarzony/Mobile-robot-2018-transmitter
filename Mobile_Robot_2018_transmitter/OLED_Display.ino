@@ -52,12 +52,12 @@
 // 	String output;
 // 	switch (control_mode)
 // 	{
-// 	case CONTROLS_STANDARD:
-// 		output = "STD";
+// 	case CONTROLS_TANK:
+// 		output = "TANK";
 // 		break;
 
-// 	case CONTROLS_ENCHANCED:
-// 		output = "ENCH";
+// 	case CONTROLS_CAR:
+// 		output = "CAR";
 // 		break;
 
 // 	case CONTROLS_MEASURED:
